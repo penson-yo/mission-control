@@ -23,12 +23,12 @@ export async function GET() {
     const bwData = await bwResponse.json();
     const gamoraData = await gamoraResponse.json();
 
-    // Parse PnL history
-    const parsePnlHistory = (data: any) => {
-      const allTime = data?.find((d: any) => d[0] === "allTime");
-      if (!allTime) return [];
+    // Parse PnL history from "day" period
+    const parseDayPnl = (data: any) => {
+      const day = data?.find((d: any) => d[0] === "day");
+      if (!day) return [];
       
-      const pnlHistory = allTime[1]?.pnlHistory || [];
+      const pnlHistory = day[1]?.pnlHistory || [];
       
       return pnlHistory.map((entry: any) => ({
         time: entry[0],
@@ -36,24 +36,24 @@ export async function GET() {
       }));
     };
 
-    const bwHistory = parsePnlHistory(bwData);
-    const gamoraHistory = parsePnlHistory(gamoraData);
+    const bwHistory = parseDayPnl(bwData);
+    const gamoraHistory = parseDayPnl(gamoraData);
 
-    // Combine and aggregate by day
+    // Combine both histories
+    const combined = [...bwHistory, ...gamoraHistory];
+    
+    // Sort by time and aggregate by day
+    combined.sort((a, b) => a.time - b.time);
+    
     const pnlByDay = new Map<string, number>();
     
-    const addToDay = (history: any[], multiplier: number) => {
-      history.forEach((entry: any) => {
-        const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
-        const current = pnlByDay.get(date) || 0;
-        pnlByDay.set(date, current + entry.pnl * multiplier);
-      });
-    };
-    
-    addToDay(bwHistory, 1);
-    addToDay(gamoraHistory, 1);
+    combined.forEach((entry: any) => {
+      const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
+      const current = pnlByDay.get(date) || 0;
+      pnlByDay.set(date, current + entry.pnl);
+    });
 
-    // Convert to array and take last 7 days
+    // Convert to array
     const result = Array.from(pnlByDay.entries()).map(([date, pnl]) => ({
       date,
       pnl: Math.round(pnl * 100) / 100,
