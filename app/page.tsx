@@ -24,17 +24,19 @@ const trades = [
   { id: 5, bot: "Gamora", type: "LONG", size: "100 SOL", entry: "$120", exit: "$125", pnl: "+$12.00", time: "Yesterday" },
 ];
 
-const pnlData = [
-  { date: "Mon", pnl: 0 },
-  { date: "Tue", pnl: 5 },
-  { date: "Wed", pnl: 12 },
-  { date: "Thu", pnl: 8 },
-  { date: "Fri", pnl: 15 },
-  { date: "Sat", pnl: 18 },
-  { date: "Sun", pnl: 13.5 },
-];
-
 export default function Home() {
+  const [chartData, setChartData] = useState<{date: string, pnl: number}[]>([]);
+
+  useEffect(() => {
+    fetch("/api/pnl-history")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setChartData(data);
+        }
+      });
+  }, []);
+
   return (
     <SidebarProvider defaultOpen={true}>
       <AppSidebar />
@@ -105,7 +107,7 @@ export default function Home() {
             <CardContent>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={pnlData}>
+                  <AreaChart data={chartData.length > 0 ? chartData : undefined}>
                     <defs>
                       <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
