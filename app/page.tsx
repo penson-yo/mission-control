@@ -1,10 +1,11 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Wallet, TrendingUp, Bot, Percent } from "lucide-react";
+import { Wallet, TrendingUp, Bot, Percent, Loader2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import {
   Table,
@@ -41,6 +42,7 @@ export default function Home() {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
         </header>
+        <PortfolioCard />
         <div className="p-8">
           <h1 className="text-3xl font-bold mb-6">Mission Control</h1>
           
@@ -105,8 +107,8 @@ export default function Home() {
                   <AreaChart data={pnlData}>
                     <defs>
                       <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ff6900" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#ff6900" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" stroke="#888888" fontSize={12} />
@@ -121,8 +123,8 @@ export default function Home() {
                     <Area 
                       type="monotone" 
                       dataKey="pnl" 
-                      stroke="#ff6900" 
-                      strokeWidth={1}
+                      stroke="#22c55e" 
+                      strokeWidth={2}
                       fillOpacity={1} 
                       fill="url(#colorPnl)" 
                     />
@@ -182,5 +184,39 @@ export default function Home() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function PortfolioCard() {
+  const [portfolio, setPortfolio] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/portfolio")
+      .then((res) => res.json())
+      .then((data) => {
+        setPortfolio(data.totalPortfolio ?? 0);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <Card className="m-8 mb-0">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium">Total Portfolio</CardTitle>
+        <Wallet className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <Loader2 className="h-6 w-6 animate-spin" />
+        ) : (
+          <div className="text-3xl font-bold">${portfolio.toFixed(2)}</div>
+        )}
+        <p className="text-xs text-muted-foreground">USDC</p>
+      </CardContent>
+    </Card>
   );
 }
