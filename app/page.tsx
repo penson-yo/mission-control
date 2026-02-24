@@ -7,19 +7,31 @@ import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, TrendingUp, Loader2 } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import {
-  Table,
+import { Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 export default function Home() {
   const [chartData, setChartData] = useState<{date: string, pnl: number}[]>([]);
   const [trades, setTrades] = useState<any[]>([]);
   const [totalTradePnl, setTotalTradePnl] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  const totalPages = Math.ceil(trades.length / itemsPerPage);
+  const paginatedTrades = trades.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
     fetch("/api/pnl-history")
@@ -108,14 +120,14 @@ export default function Home() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {trades.length === 0 ? (
+                  {paginatedTrades.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center text-muted-foreground">
                         No trades yet
                       </TableCell>
                     </TableRow>
                   ) : (
-                    trades.map((trade) => (
+                    paginatedTrades.map((trade) => (
                       <TableRow key={trade.id}>
                         <TableCell className="font-medium">{trade.bot}</TableCell>
                         <TableCell>
@@ -148,6 +160,30 @@ export default function Home() {
               </Table>
             </CardContent>
           </Card>
+          
+          {totalPages > 1 && (
+            <Pagination className="mt-4">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious 
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext 
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>
