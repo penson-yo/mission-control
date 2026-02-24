@@ -23,35 +23,39 @@ export async function GET() {
     const bwData = await bwResponse.json();
     const gamoraData = await gamoraResponse.json();
 
-    // Parse PnL history from "day" period
-    const parseDayPnl = (data: any) => {
-      const day = data?.find((d: any) => d[0] === "day");
-      if (!day) return [];
+    // Parse allTime PnL (total trading PnL, excludes transfers)
+    const parseAllTimePnl = (data: any) => {
+      const allTime = data?.find((d: any) => d[0] === "allTime");
+      if (!allTime) return { total: 0, history: [] };
       
-      const pnlHistory = day[1]?.pnlHistory || [];
+      const pnlHistory = allTime[1]?.pnlHistory || [];
+      const total = parseFloat(pnlHistory[pnlHistory.length - 1]?.[1]) || 0;
       
-      return pnlHistory.map((entry: any) => ({
-        time: entry[0],
-        pnl: parseFloat(entry[1]) || 0,
-      }));
+      return { 
+        total, 
+        history: pnlHistory.map((entry: any) => ({
+          time: entry[0],
+          pnl: parseFloat(entry[1]) || 0,
+        }))
+      };
     };
 
-    const bwHistory = parseDayPnl(bwData);
-    const gamoraHistory = parseDayPnl(gamoraData);
+    const bw = parseAllTimePnl(bwData);
+    const gamora = parseAllTimePnl(gamoraData);
 
-    // Combine both histories
-    const combined = [...bwHistory, ...gamoraHistory];
-    
-    // Sort by time and aggregate by day
-    combined.sort((a, b) => a.time - b.time);
-    
+    // Combine and aggregate by day
     const pnlByDay = new Map<string, number>();
     
-    combined.forEach((entry: any) => {
-      const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
-      const current = pnlByDay.get(date) || 0;
-      pnlByDay.set(date, current + entry.pnl);
-    });
+    const addToDay = (history: any[]) => {
+      history.forEach((entry: any) => {
+        const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
+        const current = pnlByDay.get(date) || 0;
+        pnlByDay.set(date, current + entry.pnl);
+      });
+    };
+    
+    addToDay(bw.history);
+    addToDay(gamora.history);
 
     // Convert to array
     const result = Array.from(pnlByDay.entries()).map(([date, pnl]) => ({
@@ -59,7 +63,10 @@ export async function GET() {
       pnl: Math.round(pnl * 100) / 100,
     }));
 
-    return NextResponse.json(result);
+    return NextResponse.json({
+      data: result,
+      totalPnl: bw.total + gamora.total,
+    });
   } catch (error) {
     console.error("Hyperliquid API error:", error);
     return NextResponse.json(

@@ -31,8 +31,8 @@ export default function Home() {
     fetch("/api/pnl-history")
       .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data)) {
-          setChartData(data);
+        if (data.data && Array.isArray(data.data)) {
+          setChartData(data.data);
         }
       });
   }, []);
