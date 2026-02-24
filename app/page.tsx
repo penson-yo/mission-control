@@ -59,9 +59,15 @@ export default function Home() {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
         </header>
-        <PortfolioCard />
-        <PnLCard />
-        <div className="p-8">
+        <div className="flex gap-4 m-8">
+          <div className="flex-1">
+            <PortfolioCard />
+          </div>
+          <div className="flex-1">
+            <PnLCard />
+          </div>
+        </div>
+        <div className="p-8 pt-0">
 
           {/* PnL Chart */}
           <Card className="mb-8">
@@ -207,7 +213,7 @@ function PortfolioCard() {
   }, []);
 
   return (
-    <Card className="m-8 mb-0">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">Total Portfolio</CardTitle>
         <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -241,7 +247,7 @@ function PnLCard() {
   }, []);
 
   return (
-    <Card className="m-8 mb-0">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">Total PnL</CardTitle>
         <TrendingUp className="h-4 w-4 text-muted-foreground" />
