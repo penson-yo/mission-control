@@ -7,14 +7,9 @@ import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, TrendingUp, Loader2 } from "lucide-react";
 
-interface BotData {
-  balance: number;
-  pnl: number;
-}
-
 export default function Portfolio() {
-  const [blackWidow, setBlackWidow] = useState<BotData>({ balance: 0, pnl: 0 });
-  const [gamora, setGamora] = useState<BotData>({ balance: 0, pnl: 0 });
+  const [totalPortfolio, setTotalPortfolio] = useState(0);
+  const [totalPnl, setTotalPnl] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,14 +18,8 @@ export default function Portfolio() {
       fetch("/api/pnl").then((res) => res.json()),
     ])
       .then(([portfolioData, pnlData]) => {
-        setBlackWidow({
-          balance: portfolioData.blackWidow?.balance || 0,
-          pnl: pnlData.blackWidowPnl || 0,
-        });
-        setGamora({
-          balance: portfolioData.gamora?.balance || 0,
-          pnl: pnlData.gamoraPnl || 0,
-        });
+        setTotalPortfolio(portfolioData.totalPortfolio || 0);
+        setTotalPnl(pnlData.totalPnl || 0);
         setLoading(false);
       })
       .catch(() => {
@@ -65,51 +54,29 @@ export default function Portfolio() {
           <h1 className="text-3xl font-bold mb-6">Portfolio</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Black Widow */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="text-orange-500">●</span>
-                  Black Widow
+                  <Wallet className="h-4 w-4" />
+                  Total Balance
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Balance</p>
-                    <p className="text-2xl font-bold">${blackWidow.balance.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">All-time PnL</p>
-                    <p className={`text-2xl font-bold ${blackWidow.pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {blackWidow.pnl >= 0 ? "+" : ""}{blackWidow.pnl.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
+                <p className="text-4xl font-bold">${totalPortfolio.toFixed(2)}</p>
               </CardContent>
             </Card>
 
-            {/* Gamora */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span className="text-green-500">●</span>
-                  Gamora
+                  <TrendingUp className="h-4 w-4" />
+                  Total PnL
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Balance</p>
-                    <p className="text-2xl font-bold">${gamora.balance.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">All-time PnL</p>
-                    <p className={`text-2xl font-bold ${gamora.pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {gamora.pnl >= 0 ? "+" : ""}{gamora.pnl.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
+                <p className={`text-4xl font-bold ${totalPnl >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {totalPnl >= 0 ? "+" : ""}{totalPnl.toFixed(2)}
+                </p>
               </CardContent>
             </Card>
           </div>
