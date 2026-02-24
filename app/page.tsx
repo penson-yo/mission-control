@@ -16,16 +16,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-const trades = [
-  { id: 1, bot: "Black Widow", type: "LONG", size: "0.01 BTC", entry: "$64,500", exit: "$64,774", pnl: "+$17.65", time: "2:30 PM" },
-  { id: 2, bot: "Black Widow", type: "SHORT", size: "0.01 BTC", entry: "$65,100", exit: "$64,900", pnl: "-$10.20", time: "1:15 PM" },
-  { id: 3, bot: "Black Widow", type: "LONG", size: "0.005 BTC", entry: "$63,800", exit: "$64,200", pnl: "+$8.50", time: "11:45 AM" },
-  { id: 4, bot: "Black Widow", type: "SHORT", size: "0.01 BTC", entry: "$64,000", exit: "$64,500", pnl: "-$9.81", time: "10:00 AM" },
-  { id: 5, bot: "Gamora", type: "LONG", size: "100 SOL", entry: "$120", exit: "$125", pnl: "+$12.00", time: "Yesterday" },
-];
-
 export default function Home() {
   const [chartData, setChartData] = useState<{date: string, pnl: number}[]>([]);
+  const [trades, setTrades] = useState<any[]>([]);
+  const [totalTradePnl, setTotalTradePnl] = useState<number>(0);
 
   useEffect(() => {
     fetch("/api/pnl-history")
@@ -33,6 +27,15 @@ export default function Home() {
       .then((data) => {
         if (data.data && Array.isArray(data.data)) {
           setChartData(data.data);
+        }
+      });
+    
+    fetch("/api/trades")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.trades && Array.isArray(data.trades)) {
+          setTrades(data.trades);
+          setTotalTradePnl(data.totalPnl || 0);
         }
       });
   }, []);
@@ -105,31 +108,43 @@ export default function Home() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {trades.map((trade) => (
-                    <TableRow key={trade.id}>
-                      <TableCell className="font-medium">{trade.bot}</TableCell>
-                      <TableCell>
-                        <span className={trade.type === "LONG" ? "text-green-500" : "text-red-500"}>
-                          {trade.type}
-                        </span>
+                  {trades.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                        No trades yet
                       </TableCell>
-                      <TableCell>{trade.size}</TableCell>
-                      <TableCell>{trade.entry}</TableCell>
-                      <TableCell>{trade.exit}</TableCell>
-                      <TableCell className={trade.pnl.startsWith("+") ? "text-green-500" : "text-red-500"}>
-                        {trade.pnl}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground">{trade.time}</TableCell>
                     </TableRow>
-                  ))}
+                  ) : (
+                    trades.map((trade) => (
+                      <TableRow key={trade.id}>
+                        <TableCell className="font-medium">{trade.bot}</TableCell>
+                        <TableCell>
+                          <span className={trade.type === "LONG" ? "text-green-500" : "text-red-500"}>
+                            {trade.type}
+                          </span>
+                        </TableCell>
+                        <TableCell>{trade.size}</TableCell>
+                        <TableCell>{trade.entry}</TableCell>
+                        <TableCell>{trade.exit}</TableCell>
+                        <TableCell className={trade.pnl.startsWith("+") ? "text-green-500" : "text-red-500"}>
+                          {trade.pnl}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{trade.time}</TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
-                <tfoot>
-                  <TableRow className="bg-muted/50 font-semibold">
-                    <TableCell colSpan={5}>Total</TableCell>
-                    <TableCell className="text-green-500">+$18.14</TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
-                </tfoot>
+                {trades.length > 0 && (
+                  <tfoot>
+                    <TableRow className="bg-muted/50 font-semibold">
+                      <TableCell colSpan={5}>Total</TableCell>
+                      <TableCell className={totalTradePnl >= 0 ? "text-green-500" : "text-red-500"}>
+                        {totalTradePnl >= 0 ? "+" : ""}{totalTradePnl.toFixed(2)}
+                      </TableCell>
+                      <TableCell></TableCell>
+                    </TableRow>
+                  </tfoot>
+                )}
               </Table>
             </CardContent>
           </Card>
