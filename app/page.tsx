@@ -59,8 +59,8 @@ export default function Home() {
                   <AreaChart data={chartData.length > 0 ? chartData : undefined}>
                     <defs>
                       <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#f54900" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#f54900" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" stroke="#888888" fontSize={12} />
@@ -75,7 +75,7 @@ export default function Home() {
                     <Area 
                       type="monotone" 
                       dataKey="pnl" 
-                      stroke="#22c55e" 
+                      stroke="#f54900" 
                       strokeWidth={2}
                       fillOpacity={1} 
                       fill="url(#colorPnl)" 
