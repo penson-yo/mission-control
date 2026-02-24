@@ -43,6 +43,7 @@ export default function Home() {
           <SidebarTrigger />
         </header>
         <PortfolioCard />
+        <PnLCard />
         <div className="p-8">
           <h1 className="text-3xl font-bold mb-6">Mission Control</h1>
           
@@ -216,6 +217,42 @@ function PortfolioCard() {
           <div className="text-3xl font-bold">${portfolio.toFixed(2)}</div>
         )}
         <p className="text-xs text-muted-foreground">USDC</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PnLCard() {
+  const [pnl, setPnl] = useState<number>(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/pnl")
+      .then((res) => res.json())
+      .then((data) => {
+        setPnl(data.totalPnl ?? 0);
+        setLoading(false);
+      })
+      .catch(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  return (
+    <Card className="m-8 mb-0">
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium">Total PnL</CardTitle>
+        <TrendingUp className="h-4 w-4 text-muted-foreground" />
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <Loader2 className="h-6 w-6 animate-spin" />
+        ) : (
+          <div className={`text-3xl font-bold ${pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
+            {pnl >= 0 ? "+" : ""}{pnl.toFixed(2)}
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">All time</p>
       </CardContent>
     </Card>
   );
