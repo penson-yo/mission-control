@@ -23,39 +23,43 @@ export async function GET() {
     const bwData = await bwResponse.json();
     const gamoraData = await gamoraResponse.json();
 
-    // Parse allTime PnL (total trading PnL, excludes transfers)
-    const parseAllTimePnl = (data: any) => {
+    // Parse allTime PnL (cumulative) and calculate daily changes
+    const parsePnlWithDailyChanges = (data: any) => {
       const allTime = data?.find((d: any) => d[0] === "allTime");
-      if (!allTime) return { total: 0, history: [] };
+      if (!allTime) return { total: 0, daily: [] };
       
       const pnlHistory = allTime[1]?.pnlHistory || [];
       const total = parseFloat(pnlHistory[pnlHistory.length - 1]?.[1]) || 0;
       
-      return { 
-        total, 
-        history: pnlHistory.map((entry: any) => ({
-          time: entry[0],
-          pnl: parseFloat(entry[1]) || 0,
-        }))
-      };
+      // Calculate daily changes (difference between consecutive entries)
+      const daily: {time: number, pnl: number}[] = [];
+      for (let i = 1; i < pnlHistory.length; i++) {
+        const prev = parseFloat(pnlHistory[i-1][1]) || 0;
+        const curr = parseFloat(pnlHistory[i][1]) || 0;
+        daily.push({
+          time: pnlHistory[i][0],
+          pnl: Math.round((curr - prev) * 100) / 100
+        });
+      }
+      
+      return { total, daily };
     };
 
-    const bw = parseAllTimePnl(bwData);
-    const gamora = parseAllTimePnl(gamoraData);
+    const bw = parsePnlWithDailyChanges(bwData);
+    const gamora = parsePnlWithDailyChanges(gamoraData);
 
-    // Combine and aggregate by day
+    // Combine daily changes from both bots
+    const combined = [...bw.daily, ...gamora.daily];
+    combined.sort((a, b) => a.time - b.time);
+    
+    // Aggregate by day
     const pnlByDay = new Map<string, number>();
     
-    const addToDay = (history: any[]) => {
-      history.forEach((entry: any) => {
-        const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
-        const current = pnlByDay.get(date) || 0;
-        pnlByDay.set(date, current + entry.pnl);
-      });
-    };
-    
-    addToDay(bw.history);
-    addToDay(gamora.history);
+    combined.forEach((entry: any) => {
+      const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
+      const current = pnlByDay.get(date) || 0;
+      pnlByDay.set(date, current + entry.pnl);
+    });
 
     // Convert to array
     const result = Array.from(pnlByDay.entries()).map(([date, pnl]) => ({
