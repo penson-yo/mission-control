@@ -9,7 +9,7 @@ export function SidebarTrigger() {
 
   return (
     <Button
-      variant="ghost"
+      variant="lucide"
       size="icon"
       onClick={toggleSidebar}
       className="h-9 w-9"
