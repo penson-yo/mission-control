@@ -105,8 +105,8 @@ export default function Home() {
                   <AreaChart data={pnlData}>
                     <defs>
                       <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#oklch" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#e0801a" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="#ff6900" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#ff6900" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <XAxis dataKey="date" stroke="#888888" fontSize={12} />
@@ -121,8 +121,8 @@ export default function Home() {
                     <Area 
                       type="monotone" 
                       dataKey="pnl" 
-                      stroke="#22c55e" 
-                      strokeWidth={2}
+                      stroke="#ff6900" 
+                      strokeWidth={1}
                       fillOpacity={1} 
                       fill="url(#colorPnl)" 
                     />
@@ -169,6 +169,13 @@ export default function Home() {
                     </TableRow>
                   ))}
                 </TableBody>
+                <tfoot>
+                  <TableRow className="bg-muted/50 font-semibold">
+                    <TableCell colSpan={5}>Total</TableCell>
+                    <TableCell className="text-green-500">+$18.14</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </tfoot>
               </Table>
             </CardContent>
           </Card>
