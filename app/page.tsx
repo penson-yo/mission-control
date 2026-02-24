@@ -6,15 +6,21 @@ import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Wallet, TrendingUp, Bot, Percent } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
-const pnlData = [
-  { date: "Mon", pnl: 0 },
-  { date: "Tue", pnl: 5 },
-  { date: "Wed", pnl: 12 },
-  { date: "Thu", pnl: 8 },
-  { date: "Fri", pnl: 15 },
-  { date: "Sat", pnl: 18 },
-  { date: "Sun", pnl: 13.5 },
+const trades = [
+  { id: 1, bot: "Black Widow", type: "LONG", size: "0.01 BTC", entry: "$64,500", exit: "$64,774", pnl: "+$17.65", time: "2:30 PM" },
+  { id: 2, bot: "Black Widow", type: "SHORT", size: "0.01 BTC", entry: "$65,100", exit: "$64,900", pnl: "-$10.20", time: "1:15 PM" },
+  { id: 3, bot: "Black Widow", type: "LONG", size: "0.005 BTC", entry: "$63,800", exit: "$64,200", pnl: "+$8.50", time: "11:45 AM" },
+  { id: 4, bot: "Black Widow", type: "SHORT", size: "0.01 BTC", entry: "$64,000", exit: "$64,500", pnl: "-$9.81", time: "10:00 AM" },
+  { id: 5, bot: "Gamora", type: "LONG", size: "100 SOL", entry: "$120", exit: "$125", pnl: "+$12.00", time: "Yesterday" },
 ];
 
 export default function Home() {
@@ -79,14 +85,14 @@ export default function Home() {
           </div>
 
           {/* PnL Chart */}
-          <Card>
+          <Card className="mb-8">
             <CardHeader>
               <CardTitle>PnL History</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={pnlData}>
+                  <AreaChart>
                     <defs>
                       <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
@@ -113,6 +119,47 @@ export default function Home() {
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Trades Table */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Trades</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Bot</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Size</TableHead>
+                    <TableHead>Entry</TableHead>
+                    <TableHead>Exit</TableHead>
+                    <TableHead>PnL</TableHead>
+                    <TableHead>Time</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trades.map((trade) => (
+                    <TableRow key={trade.id}>
+                      <TableCell className="font-medium">{trade.bot}</TableCell>
+                      <TableCell>
+                        <span className={trade.type === "LONG" ? "text-green-500" : "text-red-500"}>
+                          {trade.type}
+                        </span>
+                      </TableCell>
+                      <TableCell>{trade.size}</TableCell>
+                      <TableCell>{trade.entry}</TableCell>
+                      <TableCell>{trade.exit}</TableCell>
+                      <TableCell className={trade.pnl.startsWith("+") ? "text-green-500" : "text-red-500"}>
+                        {trade.pnl}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{trade.time}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </div>
