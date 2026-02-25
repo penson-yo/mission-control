@@ -48,7 +48,7 @@ export async function GET() {
             entry: `$${price.toLocaleString()}`,
             exit: `$${price.toLocaleString()}`,
             pnl: pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`,
-            time: new Date(fill.time || Date.now()).toLocaleTimeString(),
+            time: new Date(fill.time || Date.now()).toLocaleTimeString('en-AU', { timeZone: 'Australia/Melbourne', hour: '2-digit', minute: '2-digit' }),
             rawPnl: pnl,
           };
         });

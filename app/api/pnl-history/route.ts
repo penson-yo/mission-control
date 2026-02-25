@@ -56,7 +56,7 @@ export async function GET() {
     const pnlByDay = new Map<string, number>();
     
     combined.forEach((entry: any) => {
-      const date = new Date(entry.time).toLocaleDateString('en-US', { weekday: 'short' });
+      const date = new Date(entry.time).toLocaleDateString('en-AU', { weekday: 'short', timeZone: 'Australia/Melbourne' });
       const current = pnlByDay.get(date) || 0;
       pnlByDay.set(date, current + entry.pnl);
     });
