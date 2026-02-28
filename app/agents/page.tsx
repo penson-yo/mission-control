@@ -14,7 +14,6 @@ interface BotData {
 
 export default function Agents() {
   const [blackWidow, setBlackWidow] = useState<BotData>({ balance: 0, pnl: 0 });
-  const [gamora, setGamora] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -26,10 +25,6 @@ export default function Agents() {
         setBlackWidow({
           balance: portfolioData.blackWidow?.balance || 0,
           pnl: pnlData.blackWidowPnl || 0,
-        });
-        setGamora({
-          balance: portfolioData.gamora?.balance || 0,
-          pnl: pnlData.gamoraPnl || 0,
         });
         setLoading(false);
       })
@@ -83,30 +78,6 @@ export default function Agents() {
                     <p className="text-sm text-muted-foreground">All-time PnL</p>
                     <p className={`text-2xl font-bold ${blackWidow.pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
                       {blackWidow.pnl >= 0 ? "+" : ""}{blackWidow.pnl.toFixed(2)}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Gamora */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <span className="text-green-500">●</span>
-                  Gamora
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Balance</p>
-                    <p className="text-2xl font-bold">${gamora.balance.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">All-time PnL</p>
-                    <p className={`text-2xl font-bold ${gamora.pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
-                      {gamora.pnl >= 0 ? "+" : ""}{gamora.pnl.toFixed(2)}
                     </p>
                   </div>
                 </div>

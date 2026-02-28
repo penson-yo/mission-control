@@ -2,26 +2,17 @@ import { NextResponse } from "next/server";
 
 // Black Widow wallet
 const BLACK_WIDOW = "0xD84C6FC956e2798C9cc4cED40573188Cea98F996";
-const GAMORA = "0xa38059e56d81f471129b7ea02b202ddc9c3a65c9";
 
 export async function GET() {
   try {
-    // Fetch portfolio data for both bots
-    const [bwResponse, gamoraResponse] = await Promise.all([
-      fetch("https://api.hyperliquid.xyz/info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "portfolio", user: BLACK_WIDOW }),
-      }),
-      fetch("https://api.hyperliquid.xyz/info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "portfolio", user: GAMORA }),
-      }),
-    ]);
+    // Fetch portfolio data for Black Widow
+    const bwResponse = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "portfolio", user: BLACK_WIDOW }),
+    });
 
     const bwData = await bwResponse.json();
-    const gamoraData = await gamoraResponse.json();
 
     // Parse portfolio data
     const parsePortfolio = (data: any) => {
@@ -38,12 +29,10 @@ export async function GET() {
     };
 
     const bw = parsePortfolio(bwData);
-    const gamora = parsePortfolio(gamoraData);
 
     return NextResponse.json({
       blackWidow: bw,
-      gamora: gamora,
-      totalPortfolio: bw.balance + gamora.balance,
+      totalPortfolio: bw.balance,
     });
   } catch (error) {
     console.error("Hyperliquid API error:", error);

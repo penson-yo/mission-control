@@ -2,26 +2,17 @@ import { NextResponse } from "next/server";
 
 // Black Widow wallet
 const BLACK_WIDOW = "0xD84C6FC956e2798C9cc4cED40573188Cea98F996";
-const GAMORA = "0xa38059e56d81f471129b7ea02b202ddc9c3a65c9";
 
 export async function GET() {
   try {
-    // Fetch portfolio data for both bots
-    const [bwResponse, gamoraResponse] = await Promise.all([
-      fetch("https://api.hyperliquid.xyz/info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "portfolio", user: BLACK_WIDOW }),
-      }),
-      fetch("https://api.hyperliquid.xyz/info", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "portfolio", user: GAMORA }),
-      }),
-    ]);
+    // Fetch portfolio data for Black Widow
+    const bwResponse = await fetch("https://api.hyperliquid.xyz/info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type: "portfolio", user: BLACK_WIDOW }),
+    });
 
     const bwData = await bwResponse.json();
-    const gamoraData = await gamoraResponse.json();
 
     // Parse allTime PnL (cumulative) and calculate daily changes
     const parsePnlWithDailyChanges = (data: any) => {
@@ -46,17 +37,12 @@ export async function GET() {
     };
 
     const bw = parsePnlWithDailyChanges(bwData);
-    const gamora = parsePnlWithDailyChanges(gamoraData);
 
-    // Combine daily changes from both bots
-    const combined = [...bw.daily, ...gamora.daily];
-    combined.sort((a, b) => a.time - b.time);
-    
     // Aggregate by day
     const pnlByDay = new Map<string, number>();
     
-    combined.forEach((entry: any) => {
-      const date = new Date(entry.time).toLocaleDateString('en-AU', { weekday: 'short', timeZone: 'Australia/Melbourne' });
+    bw.daily.forEach((entry: any) => {
+      const date = new Date(entry.time).toLocaleDateString('en-AU', { month: 'short', day: 'numeric', timeZone: 'Australia/Melbourne' });
       const current = pnlByDay.get(date) || 0;
       pnlByDay.set(date, current + entry.pnl);
     });
@@ -69,7 +55,7 @@ export async function GET() {
 
     return NextResponse.json({
       data: result,
-      totalPnl: bw.total + gamora.total,
+      totalPnl: bw.total,
     });
   } catch (error) {
     console.error("Hyperliquid API error:", error);

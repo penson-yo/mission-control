@@ -3,7 +3,9 @@
 import * as React from "react";
 import { 
   Home, 
-  Activity
+  Activity,
+  Wallet,
+  Bot
 } from "lucide-react";
 import {
   Sidebar,
@@ -33,13 +35,13 @@ export function AppSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <a href="/agents" className="flex items-center gap-3 px-2 py-1.5 text-sm hover:bg-accent rounded-md">
-              <Activity className="h-4 w-4" />
+              <Bot className="h-4 w-4" />
               Agents
             </a>
           </SidebarMenuItem>
           <SidebarMenuItem>
             <a href="/portfolio" className="flex items-center gap-3 px-2 py-1.5 text-sm hover:bg-accent rounded-md">
-              <Activity className="h-4 w-4" />
+              <Wallet className="h-4 w-4" />
               Portfolio
             </a>
           </SidebarMenuItem>
