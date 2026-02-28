@@ -20,7 +20,6 @@ import {
   PaginationItem,
   PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
 } from "@/components/ui/pagination";
 
 export default function Home() {
@@ -28,7 +27,7 @@ export default function Home() {
   const [trades, setTrades] = useState<any[]>([]);
   const [totalTradePnl, setTotalTradePnl] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const totalPages = Math.ceil(trades.length / itemsPerPage);
   const paginatedTrades = trades.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -116,34 +115,30 @@ export default function Home() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Bot</TableHead>
+                    <TableHead>Agent</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Size</TableHead>
-                    <TableHead>Entry</TableHead>
-                    <TableHead>Exit</TableHead>
+                    <TableHead>Asset</TableHead>
                     <TableHead>PnL</TableHead>
                     <TableHead>Time</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {paginatedTrades.length === 0 ? (
+                  {trades.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
                         No trades yet
                       </TableCell>
                     </TableRow>
                   ) : (
                     paginatedTrades.map((trade) => (
                       <TableRow key={trade.id}>
-                        <TableCell className="font-medium">{trade.bot}</TableCell>
+                        <TableCell className="font-medium">{trade.agent}</TableCell>
                         <TableCell>
                           <span className={trade.type === "LONG" ? "text-green-500" : "text-red-500"}>
                             {trade.type}
                           </span>
                         </TableCell>
-                        <TableCell>{trade.size}</TableCell>
-                        <TableCell>{trade.entry}</TableCell>
-                        <TableCell>{trade.exit}</TableCell>
+                        <TableCell>{trade.asset}</TableCell>
                         <TableCell className={trade.pnl.startsWith("+") ? "text-green-500" : "text-red-500"}>
                           {trade.pnl}
                         </TableCell>
@@ -155,7 +150,7 @@ export default function Home() {
                 {trades.length > 0 && (
                   <tfoot>
                     <TableRow className="bg-muted/50 font-semibold">
-                      <TableCell colSpan={5}>Total</TableCell>
+                      <TableCell colSpan={3}>Total</TableCell>
                       <TableCell className={totalTradePnl >= 0 ? "text-green-500" : "text-red-500"}>
                         {totalTradePnl >= 0 ? "+" : ""}{totalTradePnl.toFixed(2)}
                       </TableCell>
@@ -164,32 +159,32 @@ export default function Home() {
                   </tfoot>
                 )}
               </Table>
+              
+              {totalPages > 1 && (
+                <Pagination className="mt-4">
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                    <PaginationItem>
+                      <span className="text-sm text-muted-foreground">
+                        {currentPage} / {totalPages}
+                      </span>
+                    </PaginationItem>
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              )}
             </CardContent>
           </Card>
-          
-          {totalPages > 1 && (
-            <Pagination className="mt-4">
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <span className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
-                  </span>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext 
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          )}
         </div>
       </SidebarInset>
     </SidebarProvider>
