@@ -5,7 +5,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Loader2, ExternalLink } from "lucide-react";
 
 interface BotData {
   balance: number;
@@ -14,17 +15,20 @@ interface BotData {
 
 export default function Agents() {
   const [blackWidow, setBlackWidow] = useState<BotData>({ balance: 0, pnl: 0 });
+  const [loki, setLoki] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([
-      fetch("/api/portfolio").then((res) => res.json()),
-      fetch("/api/pnl").then((res) => res.json()),
-    ])
-      .then(([portfolioData, pnlData]) => {
+    fetch("/api/portfolio")
+      .then((res) => res.json())
+      .then((data) => {
         setBlackWidow({
-          balance: portfolioData.blackWidow?.balance || 0,
-          pnl: pnlData.blackWidowPnl || 0,
+          balance: data.blackWidow?.balance || 0,
+          pnl: data.blackWidow?.pnl || 0,
+        });
+        setLoki({
+          balance: data.loki?.balance || 0,
+          pnl: data.loki?.pnl || 0,
         });
         setLoading(false);
       })
@@ -80,6 +84,42 @@ export default function Agents() {
                       {blackWidow.pnl >= 0 ? "+" : ""}{blackWidow.pnl.toFixed(2)}
                     </p>
                   </div>
+                  <Button asChild>
+                    <a href="https://hyperdash.com/address/0xd84c6fc956e2798c9cc4ced40573188cea98f996" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View on Hyperdash
+                    </a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Loki */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <span className="text-green-500">●</span>
+                  Loki
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Balance</p>
+                    <p className="text-2xl font-bold">${loki.balance.toFixed(2)}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">All-time PnL</p>
+                    <p className={`text-2xl font-bold ${loki.pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
+                      {loki.pnl >= 0 ? "+" : ""}{loki.pnl.toFixed(2)}
+                    </p>
+                  </div>
+                  <Button asChild>
+                    <a href="https://hyperdash.com/address/0xa38059e56d81f471129b7ea02b202ddc9c3a65c9" target="_blank" rel="noopener noreferrer">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View on Hyperdash
+                    </a>
+                  </Button>
                 </div>
               </CardContent>
             </Card>
