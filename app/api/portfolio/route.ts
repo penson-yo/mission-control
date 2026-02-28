@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
-// Wallet addresses
-const BLACK_WIDOW = "0xD84C6FC956e2798C9cc4cED40573188Cea98F996";
-const LOKI = "0xA38059E56D81F471129B7EA02B202DDc9C3A65c9";
+const BLACK_WIDOW = "0xad80393600f6c510633fff285d5dacce8785089d";
+const LOKI = "0x7612df241fa696d12b384aa04ebc5a2cb4700daf";
 
 async function fetchPortfolio(address: string) {
   const response = await fetch("https://api.hyperliquid.xyz/info", {

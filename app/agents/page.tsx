@@ -85,7 +85,7 @@ export default function Agents() {
                     </p>
                   </div>
                   <Button asChild>
-                    <a href="https://hyperdash.com/address/0xd84c6fc956e2798c9cc4ced40573188cea98f996" target="_blank" rel="noopener noreferrer">
+                    <a href="https://hyperdash.com/address/0xad80393600f6c510633fff285d5dacce8785089d" target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View on Hyperdash
                     </a>
@@ -115,7 +115,7 @@ export default function Agents() {
                     </p>
                   </div>
                   <Button asChild>
-                    <a href="https://hyperdash.com/address/0xa38059e56d81f471129b7ea02b202ddc9c3a65c9" target="_blank" rel="noopener noreferrer">
+                    <a href="https://hyperdash.com/address/0x7612df241fa696d12b384aa04ebc5a2cb4700daf" target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View on Hyperdash
                     </a>
