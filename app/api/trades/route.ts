@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { Fill, PortfolioResponse } from "@/lib/types/hyperliquid";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
 
-async function fetchFills(address: string) {
+async function fetchFills(address: string): Promise<Fill[]> {
   const response = await fetch("https://api.hyperliquid.xyz/info", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -19,19 +20,19 @@ export async function GET() {
       fetchFills(LOKI),
     ]);
 
-    const parseTrades = (fills: any[], botName: string) => {
+    const parseTrades = (fills: Fill[], botName: string) => {
       if (!fills || !Array.isArray(fills)) return [];
       
       return fills
-        .filter((fill: any) => {
-          const pnl = parseFloat(fill.closedPnl || 0);
+        .filter((fill: Fill) => {
+          const pnl = parseFloat(fill.closedPnl || "0");
           return Math.abs(pnl) >= 1;
         })
         .slice(-20)
         .reverse()
-        .map((fill: any, index: number) => {
+        .map((fill: Fill, index: number) => {
           const side = fill.side === "A" ? "LONG" : "SHORT";
-          const pnl = parseFloat(fill.closedPnl || 0);
+          const pnl = parseFloat(fill.closedPnl || "0");
           const coin = fill.coin || "UNKNOWN";
           const timestamp = fill.time || Date.now();
           

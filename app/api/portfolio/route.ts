@@ -1,22 +1,23 @@
 import { NextResponse } from "next/server";
+import { PortfolioResponse } from "@/lib/types/hyperliquid";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
 
-async function fetchPortfolio(address: string) {
+async function fetchPortfolio(address: string): Promise<{ balance: number; pnl: number }> {
   const response = await fetch("https://api.hyperliquid.xyz/info", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ type: "portfolio", user: address }),
   });
 
-  const data = await response.json();
+  const data: PortfolioResponse = await response.json();
   
-  const allTime = data?.find((d: any) => d[0] === "allTime");
+  const allTime = data?.find((d: [string, unknown]) => d[0] === "allTime");
   if (!allTime) return { balance: 0, pnl: 0 };
   
-  const history = allTime[1]?.accountValueHistory;
-  const pnlHistory = allTime[1]?.pnlHistory;
+  const history = (allTime[1] as AllTimeData)?.accountValueHistory;
+  const pnlHistory = (allTime[1] as AllTimeData)?.pnlHistory;
   
   const balance = parseFloat(history?.[history.length - 1]?.[1]) || 0;
   const pnl = parseFloat(pnlHistory?.[pnlHistory.length - 1]?.[1]) || 0;
