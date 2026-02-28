@@ -13,6 +13,9 @@ interface BotData {
   pnl: number;
 }
 
+const BLACK_WIDOW_ADDRESS = process.env.NEXT_PUBLIC_BLACK_WIDOW_ADDRESS!;
+const LOKI_ADDRESS = process.env.NEXT_PUBLIC_LOKI_ADDRESS!;
+
 export default function Agents() {
   const [blackWidow, setBlackWidow] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loki, setLoki] = useState<BotData>({ balance: 0, pnl: 0 });
@@ -85,7 +88,7 @@ export default function Agents() {
                     </p>
                   </div>
                   <Button asChild>
-                    <a href="https://hyperdash.com/address/0xad80393600f6c510633fff285d5dacce8785089d" target="_blank" rel="noopener noreferrer">
+                    <a href={`https://hyperdash.com/address/${BLACK_WIDOW_ADDRESS}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View on Hyperdash
                     </a>
@@ -115,7 +118,7 @@ export default function Agents() {
                     </p>
                   </div>
                   <Button asChild>
-                    <a href="https://hyperdash.com/address/0x7612df241fa696d12b384aa04ebc5a2cb4700daf" target="_blank" rel="noopener noreferrer">
+                    <a href={`https://hyperdash.com/address/${LOKI_ADDRESS}`} target="_blank" rel="noopener noreferrer">
                       <ExternalLink className="mr-2 h-4 w-4" />
                       View on Hyperdash
                     </a>

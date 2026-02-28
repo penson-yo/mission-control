@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-const BLACK_WIDOW = "0xad80393600f6c510633fff285d5dacce8785089d";
-const LOKI = "0x7612df241fa696d12b384aa04ebc5a2cb4700daf";
+const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
+const LOKI = process.env.LOKI_ADDRESS!;
 
 async function fetchFills(address: string) {
   const response = await fetch("https://api.hyperliquid.xyz/info", {
