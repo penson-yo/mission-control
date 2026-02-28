@@ -1,35 +1,34 @@
 import { NextResponse } from "next/server";
 
-// Black Widow wallet
-const BLACK_WIDOW = "0xD84C6FC956e2798C9cc4cED40573188Cea98F996";
+const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
+const LOKI = process.env.LOKI_ADDRESS!;
+
+async function fetchPnL(address: string) {
+  const response = await fetch("https://api.hyperliquid.xyz/info", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "portfolio", user: address }),
+  });
+
+  const data = await response.json();
+  const allTime = data?.find((d: any) => d[0] === "allTime");
+  if (!allTime) return 0;
+  
+  const pnlHistory = allTime[1]?.pnlHistory;
+  return parseFloat(pnlHistory?.[pnlHistory.length - 1]?.[1]) || 0;
+}
 
 export async function GET() {
   try {
-    // Fetch portfolio data for Black Widow
-    const bwResponse = await fetch("https://api.hyperliquid.xyz/info", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "portfolio", user: BLACK_WIDOW }),
-    });
-
-    const bwData = await bwResponse.json();
-
-    // Parse portfolio data
-    const parsePortfolio = (data: any): number => {
-      const allTime = data?.find((d: any) => d[0] === "allTime");
-      if (!allTime) return 0;
-      
-      const pnlHistory = allTime[1]?.pnlHistory;
-      const pnl = parseFloat(pnlHistory?.[pnlHistory.length - 1]?.[1]) || 0;
-      
-      return pnl;
-    };
-
-    const bwPnl = parsePortfolio(bwData);
+    const [bwPnl, lokiPnl] = await Promise.all([
+      fetchPnL(BLACK_WIDOW),
+      fetchPnL(LOKI),
+    ]);
 
     return NextResponse.json({
-      totalPnl: bwPnl,
+      totalPnl: bwPnl + lokiPnl,
       blackWidowPnl: bwPnl,
+      lokiPnl: lokiPnl,
     });
   } catch (error) {
     console.error("Hyperliquid API error:", error);
