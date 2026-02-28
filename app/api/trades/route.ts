@@ -33,6 +33,7 @@ export async function GET() {
           const side = fill.side === "A" ? "LONG" : "SHORT";
           const pnl = parseFloat(fill.closedPnl || 0);
           const coin = fill.coin || "UNKNOWN";
+          const timestamp = fill.time || Date.now();
           
           return {
             id: `${botName}-${index}`,
@@ -40,7 +41,8 @@ export async function GET() {
             type: side,
             asset: coin,
             pnl: pnl >= 0 ? `+$${pnl.toFixed(2)}` : `-$${Math.abs(pnl).toFixed(2)}`,
-            time: new Date(fill.time || Date.now()).toLocaleTimeString('en-AU', { timeZone: 'Australia/Melbourne', hour: '2-digit', minute: '2-digit' }),
+            time: new Date(timestamp).toLocaleTimeString('en-AU', { timeZone: 'Australia/Melbourne', hour: '2-digit', minute: '2-digit' }),
+            timestamp: timestamp,
             rawPnl: pnl,
           };
         });
@@ -50,7 +52,7 @@ export async function GET() {
     const lokiTrades = parseTrades(lokiFills, "Loki");
     
     const allTrades = [...bwTrades, ...lokiTrades]
-      .sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime())
+      .sort((a, b) => b.timestamp - a.timestamp)
       .slice(0, 20);
 
     const totalPnl = allTrades.reduce((sum, t) => sum + t.rawPnl, 0);
