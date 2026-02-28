@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Table,
   TableBody,
@@ -29,28 +29,43 @@ export default function Home() {
   const [trades, setTrades] = useState<any[]>([]);
   const [totalTradePnl, setTotalTradePnl] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 5;
 
   const totalPages = Math.ceil(trades.length / itemsPerPage);
   const paginatedTrades = trades.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   useEffect(() => {
-    fetch("/api/pnl-history")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.data && Array.isArray(data.data)) {
-          setChartData(data.data);
-        }
-      });
-    
-    fetch("/api/trades")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.trades && Array.isArray(data.trades)) {
-          setTrades(data.trades);
-          setTotalTradePnl(data.totalPnl || 0);
-        }
-      });
+    Promise.allSettled([
+      fetch("/api/pnl-history")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch PnL history");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.data && Array.isArray(data.data)) {
+            setChartData(data.data);
+          }
+        }),
+      fetch("/api/trades")
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch trades");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.trades && Array.isArray(data.trades)) {
+            setTrades(data.trades);
+            setTotalTradePnl(data.totalPnl || 0);
+          }
+        }),
+    ]).then((results) => {
+      const rejected = results.filter((r) => r.status === "rejected");
+      if (rejected.length > 0) {
+        setError("Failed to load some data. Please refresh.");
+      }
+      setLoading(false);
+    });
   }, []);
 
   return (
@@ -60,6 +75,14 @@ export default function Home() {
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger />
         </header>
+        
+        {error && (
+          <div className="mx-8 mt-4 p-4 bg-red-500/10 border border-red-500/50 rounded-lg flex items-center gap-2 text-red-500">
+            <AlertCircle className="h-4 w-4" />
+            <span>{error}</span>
+          </div>
+        )}
+        
         <div className="flex gap-4 m-8">
           <div className="flex-1">
             <PortfolioCard />
