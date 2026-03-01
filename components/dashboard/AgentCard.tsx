@@ -126,7 +126,7 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={loading}
                 />
-                <Button variant="secondary" size="sm" onClick={() => setMaxAmount(true)} disabled={loading}>
+                <Button variant="outline" size="default" onClick={() => setMaxAmount(true)} disabled={loading}>
                   Max
                 </Button>
                 <Button onClick={handleWithdraw} disabled={loading} variant="secondary">
