@@ -29,8 +29,8 @@ export async function POST(request: Request) {
     const hl = new Hyperliquid({ privateKey: PEPPER_PRIVATE_KEY });
     await hl.connect();
 
-    // Use spotTransfer via the custom operations
-    const result = await (hl as any).custom.spotTransfer(
+    // Use exchange.spotTransfer for spot-to-spot transfer
+    const result = await hl.exchange.spotTransfer(
       destination,
       "USDC",
       amount.toString()
