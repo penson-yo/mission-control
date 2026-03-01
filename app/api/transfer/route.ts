@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { Hyperliquid } from "hyperliquid";
+import { Hyperliquid, signUsdTransferAction } from "hyperliquid";
+import { ethers } from "ethers";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
@@ -25,15 +26,34 @@ export async function POST(request: Request) {
     const destination = agent === "black-widow" ? BLACK_WIDOW : LOKI;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
-    // Initialize Hyperliquid with Pepper's private key
-    const hl = new Hyperliquid({ privateKey: PEPPER_PRIVATE_KEY });
-    await hl.connect();
+    // Create wallet
+    const wallet = new ethers.Wallet(PEPPER_PRIVATE_KEY);
+    
+    // Build the action
+    const action = {
+      type: "usdSend",
+      hyperliquidChain: "Mainnet",
+      signatureChainId: "0xa4b1", // Arbitrum mainnet
+      destination: destination,
+      amount: amount.toString(),
+      time: Date.now(),
+    };
 
-    // Use usdTransfer for unified accounts
-    const result = await hl.exchange.usdTransfer(
-      destination,
-      amount
-    );
+    // Sign the action
+    const signature = await signUsdTransferAction(wallet, action, true);
+
+    // Post to exchange API
+    const response = await fetch("https://api.hyperliquid.xyz/exchange", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action,
+        nonce: action.time,
+        signature,
+      }),
+    });
+
+    const result = await response.json();
 
     if (result.status === "ok") {
       return NextResponse.json({
