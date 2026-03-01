@@ -13,8 +13,8 @@ interface TransferRequest {
 
 function runPython(scriptPath: string, args: object): Promise<any> {
   return new Promise((resolve, reject) => {
-    const proc = spawn("python3", [scriptPath, JSON.stringify(args)], {
-      env: { ...process.env },
+    // Use full path to python3
+    const proc = spawn("/opt/homebrew/bin/python3", [scriptPath, JSON.stringify(args)], {
       stdio: ["pipe", "pipe", "pipe"],
     });
     
@@ -24,7 +24,6 @@ function runPython(scriptPath: string, args: object): Promise<any> {
     proc.stdout.on("data", (data) => { stdout += data.toString(); });
     proc.stderr.on("data", (data) => { stderr += data.toString(); });
     
-    // Add timeout
     const timeout = setTimeout(() => {
       proc.kill();
       reject(new Error("Transfer timeout"));
