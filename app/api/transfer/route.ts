@@ -15,6 +15,7 @@ function runPython(scriptPath: string, args: object): Promise<any> {
   return new Promise((resolve, reject) => {
     const proc = spawn("python3", [scriptPath, JSON.stringify(args)], {
       env: { ...process.env },
+      stdio: ["pipe", "pipe", "pipe"],
     });
     
     let stdout = "";
@@ -23,14 +24,23 @@ function runPython(scriptPath: string, args: object): Promise<any> {
     proc.stdout.on("data", (data) => { stdout += data.toString(); });
     proc.stderr.on("data", (data) => { stderr += data.toString(); });
     
+    // Add timeout
+    const timeout = setTimeout(() => {
+      proc.kill();
+      reject(new Error("Transfer timeout"));
+    }, 30000);
+    
     proc.on("close", (code) => {
+      clearTimeout(timeout);
       if (code !== 0) {
+        console.error("Python stderr:", stderr);
         reject(new Error(stderr || "Python script failed"));
       } else {
         try {
-          resolve(JSON.parse(stdout));
-        } catch {
-          reject(new Error("Invalid Python output"));
+          resolve(JSON.parse(stdout.trim()));
+        } catch (e) {
+          console.error("Python stdout:", stdout);
+          reject(new Error("Invalid Python output: " + stdout));
         }
       }
     });
@@ -52,12 +62,16 @@ export async function POST(request: Request) {
     const destination = agent === "black-widow" ? BLACK_WIDOW : LOKI;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
+    console.log("Starting transfer:", { destination, amount });
+
     const scriptPath = path.join(process.cwd(), "scripts", "transfer.py");
     const result = await runPython(scriptPath, {
       private_key: PEPPER_PRIVATE_KEY,
       destination: destination,
       amount: amount,
     });
+
+    console.log("Transfer result:", result);
 
     if (result.status === "ok") {
       return NextResponse.json({
@@ -74,7 +88,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Transfer error:", error);
     return NextResponse.json(
-      { error: "Transfer failed" },
+      { error: error instanceof Error ? error.message : "Transfer failed" },
       { status: 500 }
     );
   }
