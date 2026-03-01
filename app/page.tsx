@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarTrigger } from "@/components/sidebar-trigger";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, TrendingUp } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Table,
   TableBody,
@@ -28,6 +28,7 @@ export default function Home() {
   const [chartData, setChartData] = useState<{date: string, pnl: number}[]>([]);
   const [trades, setTrades] = useState<any[]>([]);
   const [totalTradePnl, setTotalTradePnl] = useState<number>(0);
+  const [totalApy, setTotalApy] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,6 +58,26 @@ export default function Home() {
           if (data.trades && Array.isArray(data.trades)) {
             setTrades(data.trades);
             setTotalTradePnl(data.totalPnl || 0);
+          }
+        }),
+      fetch("/api/apy")
+        .then((res) => res.json())
+        .then((data) => {
+          const bw = data.blackWidow || {};
+          const loki = data.loki || {};
+          
+          // Calculate combined APY weighted by balance
+          const bwNet = bw.initialBalance || 0;
+          const lokiNet = loki.initialBalance || 0;
+          const totalNet = bwNet + lokiNet;
+          
+          if (totalNet > 0) {
+            const bwPnl = bw.pnl || 0;
+            const lokiPnl = loki.pnl || 0;
+            const totalPnl = bwPnl + lokiPnl;
+            const days = Math.max(bw.days || 1, loki.days || 1, 1);
+            const apy = (totalPnl / totalNet) * (365 / days) * 100;
+            setTotalApy(Math.round(apy * 100) / 100);
           }
         }),
     ]).then((results) => {
@@ -90,6 +111,22 @@ export default function Home() {
           <div className="flex-1">
             <PnLCard />
           </div>
+          {totalApy !== null && (
+            <div className="flex-1">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">Total APY</CardTitle>
+                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className={`text-3xl font-bold ${totalApy >= 0 ? "text-green-500" : "text-red-500"}`}>
+                    {totalApy >= 0 ? "+" : ""}{totalApy}%
+                  </div>
+                  <p className="text-xs text-muted-foreground">Combined</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </div>
         <div className="p-8 pt-0">
 
