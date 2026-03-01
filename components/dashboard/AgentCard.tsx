@@ -71,6 +71,10 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
     }
   };
 
+  const setMaxAmount = (isWithdraw: boolean) => {
+    setAmount(isWithdraw ? balance.toFixed(2) : "");
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -122,6 +126,9 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={loading}
                 />
+                <Button variant="secondary" size="sm" onClick={() => setMaxAmount(true)} disabled={loading}>
+                  Max
+                </Button>
                 <Button onClick={handleWithdraw} disabled={loading} variant="secondary">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Withdraw"}
                 </Button>
