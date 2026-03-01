@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
+import { recordBalance } from "@/lib/balanceHistory";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const PEPPER_ADDRESS = process.env.PEPPER_ADDRESS!;
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get agent's private key and address
+    // Get agent's private key
     const agentPrivateKey = agent === "black-widow" ? BLACK_WIDOW_PRIVATE_KEY : LOKI_PRIVATE_KEY;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
@@ -76,6 +77,9 @@ export async function POST(request: Request) {
     console.log("Withdraw result:", result);
 
     if (result.status === "ok") {
+      // Record the withdraw as a "withdraw" event (negative balance)
+      recordBalance(agent, -amount, "withdraw");
+      
       return NextResponse.json({
         success: true,
         message: `Withdrew $${amount} from ${agentName}`,

@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ExternalLink, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
+import { Loader2, ExternalLink, ArrowDownToLine, ArrowUpFromLine, TrendingUp } from "lucide-react";
 
 interface AgentCardProps {
   name: string;
@@ -17,6 +17,14 @@ interface AgentCardProps {
   onWithdraw: (agent: string, amount: number) => Promise<void>;
 }
 
+interface ApyData {
+  balance: number;
+  initialBalance: number;
+  apy: number | null;
+  days: number | null;
+  pnl: number | null;
+}
+
 export function AgentCard({ name, address, balance, pnl, color, agentKey, onTransfer, onWithdraw }: AgentCardProps) {
   const [showFund, setShowFund] = useState(false);
   const [showWithdraw, setShowWithdraw] = useState(false);
@@ -24,6 +32,21 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [apyData, setApyData] = useState<ApyData | null>(null);
+  const [apyLoading, setApyLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/apy")
+      .then((res) => res.json())
+      .then((data) => {
+        const agentData = agentKey === "black-widow" ? data.blackWidow : data.loki;
+        setApyData(agentData);
+        setApyLoading(false);
+      })
+      .catch(() => {
+        setApyLoading(false);
+      });
+  }, [agentKey, balance]);
 
   const handleFund = async () => {
     const value = parseFloat(amount);
@@ -89,6 +112,28 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
             <p className="text-sm text-muted-foreground">Balance</p>
             <p className="text-2xl font-bold">${balance.toFixed(2)}</p>
           </div>
+          
+          {/* APY Display */}
+          {!apyLoading && apyData && apyData.apy !== null && (
+            <div className="bg-muted/50 rounded-lg p-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                <TrendingUp className="h-4 w-4" />
+                APY
+              </div>
+              <div className="flex items-baseline gap-2">
+                <span className={`text-2xl font-bold ${apyData.apy >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {apyData.apy >= 0 ? "+" : ""}{apyData.apy}%
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  ({apyData.days} days)
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Initial: ${apyData.initialBalance.toFixed(2)} → Current: ${apyData.balance.toFixed(2)}
+              </p>
+            </div>
+          )}
+          
           <div>
             <p className="text-sm text-muted-foreground">All-time PnL</p>
             <p className={`text-2xl font-bold ${pnl >= 0 ? "text-green-500" : "text-red-500"}`}>

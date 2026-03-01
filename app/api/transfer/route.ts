@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
+import { recordBalance } from "@/lib/balanceHistory";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
@@ -13,7 +14,6 @@ interface TransferRequest {
 
 function runPython(scriptPath: string, args: object): Promise<any> {
   return new Promise((resolve, reject) => {
-    // Use full path to python3
     const proc = spawn("/opt/homebrew/bin/python3", [scriptPath, JSON.stringify(args)], {
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -73,6 +73,9 @@ export async function POST(request: Request) {
     console.log("Transfer result:", result);
 
     if (result.status === "ok") {
+      // Record the transfer as a "fund" event
+      recordBalance(agent, amount, "fund");
+      
       return NextResponse.json({
         success: true,
         message: `Transferred $${amount} to ${agentName}`,
