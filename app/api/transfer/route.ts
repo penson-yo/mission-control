@@ -1,15 +1,40 @@
 import { NextResponse } from "next/server";
-import { Hyperliquid, signUsdTransferAction } from "hyperliquid";
-import { ethers } from "ethers";
+import { spawn } from "child_process";
+import path from "path";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
-const PEPPER_ADDRESS = process.env.PEPPER_ADDRESS!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
 
 interface TransferRequest {
   agent: "black-widow" | "loki";
   amount: number;
+}
+
+function runPython(scriptPath: string, args: object): Promise<any> {
+  return new Promise((resolve, reject) => {
+    const proc = spawn("python3", [scriptPath, JSON.stringify(args)], {
+      env: { ...process.env },
+    });
+    
+    let stdout = "";
+    let stderr = "";
+    
+    proc.stdout.on("data", (data) => { stdout += data.toString(); });
+    proc.stderr.on("data", (data) => { stderr += data.toString(); });
+    
+    proc.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(stderr || "Python script failed"));
+      } else {
+        try {
+          resolve(JSON.parse(stdout));
+        } catch {
+          reject(new Error("Invalid Python output"));
+        }
+      }
+    });
+  });
 }
 
 export async function POST(request: Request) {
@@ -27,40 +52,12 @@ export async function POST(request: Request) {
     const destination = agent === "black-widow" ? BLACK_WIDOW : LOKI;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
-    // Initialize Hyperliquid with both private key AND wallet address
-    const hl = new Hyperliquid({ 
-      privateKey: PEPPER_PRIVATE_KEY, 
-      walletAddress: PEPPER_ADDRESS,
-      enableWs: false 
-    });
-    await hl.connect();
-
-    // Build the action
-    const action = {
-      type: "usdSend",
-      hyperliquidChain: "Mainnet",
-      signatureChainId: "0xa4b1",
+    const scriptPath = path.join(process.cwd(), "scripts", "transfer.py");
+    const result = await runPython(scriptPath, {
+      private_key: PEPPER_PRIVATE_KEY,
       destination: destination,
-      amount: amount.toString(),
-      time: Date.now(),
-    };
-
-    // Sign the action
-    const wallet = new ethers.Wallet(PEPPER_PRIVATE_KEY);
-    const signature = await signUsdTransferAction(wallet, action, true);
-
-    // Post to exchange API
-    const response = await fetch("https://api.hyperliquid.xyz/exchange", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action,
-        nonce: action.time,
-        signature,
-      }),
+      amount: amount,
     });
-
-    const result = await response.json();
 
     if (result.status === "ok") {
       return NextResponse.json({
