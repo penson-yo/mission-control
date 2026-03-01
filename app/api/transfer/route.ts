@@ -29,11 +29,10 @@ export async function POST(request: Request) {
     const hl = new Hyperliquid({ privateKey: PEPPER_PRIVATE_KEY });
     await hl.connect();
 
-    // Use exchange.spotTransfer for spot-to-spot transfer
-    const result = await hl.exchange.spotTransfer(
+    // Use usdTransfer for unified accounts
+    const result = await hl.exchange.usdTransfer(
       destination,
-      "USDC",
-      amount.toString()
+      amount
     );
 
     if (result.status === "ok") {
