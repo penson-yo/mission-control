@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
-import { Hyperliquid, signUserSignedAction } from "hyperliquid";
+import { Hyperliquid, signUsdTransferAction } from "hyperliquid";
 import { ethers } from "ethers";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
+const PEPPER_ADDRESS = process.env.PEPPER_ADDRESS!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
 
@@ -26,10 +27,15 @@ export async function POST(request: Request) {
     const destination = agent === "black-widow" ? BLACK_WIDOW : LOKI;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
-    // Create wallet
-    const wallet = new ethers.Wallet(PEPPER_PRIVATE_KEY);
-    
-    // Try with usdSend type using userSignedAction
+    // Initialize Hyperliquid with both private key AND wallet address
+    const hl = new Hyperliquid({ 
+      privateKey: PEPPER_PRIVATE_KEY, 
+      walletAddress: PEPPER_ADDRESS,
+      enableWs: false 
+    });
+    await hl.connect();
+
+    // Build the action
     const action = {
       type: "usdSend",
       hyperliquidChain: "Mainnet",
@@ -39,14 +45,9 @@ export async function POST(request: Request) {
       time: Date.now(),
     };
 
-    // Sign with user signed action - needs 5 args
-    const payloadTypes = [
-      { name: "hyperliquidChain", type: "string" },
-      { name: "destination", type: "string" },
-      { name: "amount", type: "string" },
-      { name: "time", type: "uint64" },
-    ];
-    const signature = await signUserSignedAction(wallet, action, payloadTypes, "HyperliquidTransaction:UsdSend", true);
+    // Sign the action
+    const wallet = new ethers.Wallet(PEPPER_PRIVATE_KEY);
+    const signature = await signUsdTransferAction(wallet, action, true);
 
     // Post to exchange API
     const response = await fetch("https://api.hyperliquid.xyz/exchange", {
