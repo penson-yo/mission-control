@@ -3,14 +3,14 @@ import path from "path";
 
 const DATA_FILE = path.join(process.cwd(), "data", "balance-history.json");
 
-interface BalanceEntry {
+interface FundingEvent {
   timestamp: number;
-  balance: number;  // cumulative balance after this entry
-  type: "fund" | "withdraw" | "snapshot";
+  amount: number;
+  type: "fund" | "withdraw";
 }
 
 interface BalanceHistory {
-  [key: string]: BalanceEntry[];
+  [key: string]: FundingEvent[];
 }
 
 function readHistory(): BalanceHistory {
@@ -29,74 +29,69 @@ function writeHistory(history: BalanceHistory) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(history, null, 2));
 }
 
-export function recordBalance(agent: string, amount: number, type: "fund" | "withdraw" | "snapshot") {
+export function recordBalance(agent: string, amount: number, type: "fund" | "withdraw") {
   const history = readHistory();
   
   if (!history[agent]) {
     history[agent] = [];
   }
   
-  // Calculate new cumulative balance
-  const lastEntry = history[agent][history[agent].length - 1];
-  const previousBalance = lastEntry?.balance || 0;
-  const newBalance = type === "withdraw" 
-    ? previousBalance - amount 
-    : previousBalance + amount;
-  
   history[agent].push({
     timestamp: Date.now(),
-    balance: Math.max(0, newBalance),
+    amount,
     type,
   });
   
   writeHistory(history);
 }
 
-export function calculateAPY(agent: string): { apy: number; days: number; pnl: number } | null {
+export function getNetInvestment(agent: string): { net: number; days: number } {
   const history = readHistory();
-  const entries = history[agent];
+  const events = history[agent] || [];
   
-  if (!entries || entries.length < 2) {
-    return null;
+  if (events.length === 0) {
+    return { net: 0, days: 0 };
   }
   
-  // Find first entry with type "fund"
-  const firstFund = entries.find(e => e.type === "fund");
-  if (!firstFund) {
-    return null;
+  let net = 0;
+  let firstTimestamp = events[0].timestamp;
+  
+  for (const event of events) {
+    if (event.type === "fund") {
+      net += event.amount;
+    } else {
+      net -= event.amount;
+    }
+    if (event.timestamp < firstTimestamp) {
+      firstTimestamp = event.timestamp;
+    }
   }
   
-  const initialBalance = firstFund.balance;
-  const latestBalance = entries[entries.length - 1].balance;
+  const days = (Date.now() - firstTimestamp) / (1000 * 60 * 60 * 24);
   
-  // Calculate time elapsed
-  const now = Date.now();
-  const startTime = firstFund.timestamp;
-  const days = (now - startTime) / (1000 * 60 * 60 * 24);
-  
-  if (days < 1) {
-    return null;
-  }
-  
-  const pnl = latestBalance - initialBalance;
-  const apy = ((pnl / initialBalance) * (365 / days)) * 100;
-  
-  return {
-    apy: Math.round(apy * 100) / 100,
-    days: Math.round(days * 10) / 10,
-    pnl: Math.round(pnl * 100) / 100,
+  return { 
+    net: Math.max(0, net), 
+    days: Math.max(0.01, days) 
   };
 }
 
-export function getInitialBalance(agent: string): number {
-  const history = readHistory();
-  const entries = history[agent];
+export function calculateMetrics(agent: string, currentBalance: number) {
+  const { net, days } = getNetInvestment(agent);
   
-  if (!entries || entries.length === 0) {
-    return 0;
+  if (net <= 0) {
+    return null;
   }
   
-  // Find first fund entry
-  const firstFund = entries.find(e => e.type === "fund");
-  return firstFund?.balance || 0;
+  const pnl = currentBalance - net;
+  const pnlPercent = (pnl / net) * 100;
+  const apy = pnlPercent * (365 / days);
+  
+  return {
+    initialBalance: net,
+    currentBalance,
+    pnl,
+    pnlPercent: Math.round(pnlPercent * 100) / 100,
+    apy: Math.round(apy * 100) / 100,
+    days: Math.round(days * 10) / 10,
+  };
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { calculateAPY, getInitialBalance } from "@/lib/balanceHistory";
+import { calculateMetrics, getNetInvestment } from "@/lib/balanceHistory";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
@@ -26,28 +26,17 @@ async function fetchCurrentBalance(address: string): Promise<number> {
 
 export async function GET() {
   try {
-    const [bwBalance, lokiBalance, bwApy, lokiApy] = await Promise.all([
+    const [bwBalance, lokiBalance] = await Promise.all([
       fetchCurrentBalance(BLACK_WIDOW),
       fetchCurrentBalance(LOKI),
-      Promise.resolve(calculateAPY("black-widow")),
-      Promise.resolve(calculateAPY("loki")),
     ]);
 
+    const bwMetrics = calculateMetrics("black-widow", bwBalance);
+    const lokiMetrics = calculateMetrics("loki", lokiBalance);
+
     return NextResponse.json({
-      blackWidow: {
-        balance: bwBalance,
-        initialBalance: getInitialBalance("black-widow"),
-        apy: bwApy?.apy || null,
-        days: bwApy?.days || null,
-        pnl: bwApy?.pnl || null,
-      },
-      loki: {
-        balance: lokiBalance,
-        initialBalance: getInitialBalance("loki"),
-        apy: lokiApy?.apy || null,
-        days: lokiApy?.days || null,
-        pnl: lokiApy?.pnl || null,
-      },
+      blackWidow: bwMetrics || { initialBalance: 0, currentBalance: bwBalance, pnl: 0, pnlPercent: 0, apy: 0, days: 0 },
+      loki: lokiMetrics || { initialBalance: 0, currentBalance: lokiBalance, pnl: 0, pnlPercent: 0, apy: 0, days: 0 },
     });
   } catch (error) {
     console.error("APY API error:", error);

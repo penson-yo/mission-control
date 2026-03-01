@@ -18,11 +18,12 @@ interface AgentCardProps {
 }
 
 interface ApyData {
-  balance: number;
   initialBalance: number;
-  apy: number | null;
-  days: number | null;
-  pnl: number | null;
+  currentBalance: number;
+  pnl: number;
+  pnlPercent: number;
+  apy: number;
+  days: number;
 }
 
 export function AgentCard({ name, address, balance, pnl, color, agentKey, onTransfer, onWithdraw }: AgentCardProps) {
@@ -40,7 +41,9 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
       .then((res) => res.json())
       .then((data) => {
         const agentData = agentKey === "black-widow" ? data.blackWidow : data.loki;
-        setApyData(agentData);
+        if (agentData && agentData.initialBalance > 0) {
+          setApyData(agentData);
+        }
         setApyLoading(false);
       })
       .catch(() => {
@@ -114,24 +117,32 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
           </div>
           
           {/* APY Display */}
-          {!apyLoading && apyData && apyData.apy !== null && (
+          {!apyLoading && apyData && apyData.initialBalance > 0 && (
             <div className="bg-muted/50 rounded-lg p-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <TrendingUp className="h-4 w-4" />
-                APY
+                Since Funded
               </div>
               <div className="flex items-baseline gap-2">
-                <span className={`text-2xl font-bold ${apyData.apy >= 0 ? "text-green-500" : "text-red-500"}`}>
-                  {apyData.apy >= 0 ? "+" : ""}{apyData.apy}%
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  ({apyData.days} days)
+                <span className={`text-xl font-bold ${apyData.pnl >= 0 ? "text-green-500" : "text-red-500"}`}>
+                  {apyData.pnl >= 0 ? "+" : ""}{apyData.pnl.toFixed(2)} ({apyData.pnlPercent.toFixed(1)}%)
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Initial: ${apyData.initialBalance.toFixed(2)} → Current: ${apyData.balance.toFixed(2)}
+                {apyData.days} days • ${apyData.initialBalance.toFixed(2)} → ${apyData.currentBalance.toFixed(2)}
               </p>
+              {apyData.days >= 1 && (
+                <p className="text-sm font-semibold mt-1">
+                  APY: <span className={apyData.apy >= 0 ? "text-green-500" : "text-red-500"}>
+                    {apyData.apy >= 0 ? "+" : ""}{apyData.apy}%
+                  </span>
+                </p>
+              )}
             </div>
+          )}
+          
+          {!apyLoading && (!apyData || apyData.initialBalance === 0) && (
+            <p className="text-sm text-muted-foreground">Fund to start tracking APY</p>
           )}
           
           <div>

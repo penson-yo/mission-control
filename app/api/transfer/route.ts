@@ -46,6 +46,21 @@ function runPython(scriptPath: string, args: object): Promise<any> {
   });
 }
 
+function getBalance(address: string): Promise<number> {
+  return new Promise((resolve) => {
+    const proc = spawn("/opt/homebrew/bin/python3", ["scripts/get-balance.py", address]);
+    let stdout = "";
+    proc.stdout.on("data", (data) => { stdout += data.toString(); });
+    proc.on("close", () => {
+      try {
+        resolve(JSON.parse(stdout).balance);
+      } catch {
+        resolve(0);
+      }
+    });
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const body: TransferRequest = await request.json();
@@ -73,8 +88,11 @@ export async function POST(request: Request) {
     console.log("Transfer result:", result);
 
     if (result.status === "ok") {
-      // Record the transfer as a "fund" event
-      recordBalance(agent, amount, "fund");
+      // Wait a bit for the transfer to settle, then get actual balance
+      setTimeout(async () => {
+        const balance = await getBalance(destination);
+        recordBalance(agent, balance, "fund");
+      }, 3000);
       
       return NextResponse.json({
         success: true,

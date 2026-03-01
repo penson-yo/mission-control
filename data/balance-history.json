@@ -1,4 +1,8 @@
 {
-  "black-widow": [],
-  "loki": []
+  "black-widow": [
+    {"timestamp": 1738137600000, "amount": 100, "type": "fund"}
+  ],
+  "loki": [
+    {"timestamp": 1738137600000, "amount": 50, "type": "fund"}
+  ]
 }

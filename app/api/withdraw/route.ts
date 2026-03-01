@@ -49,6 +49,21 @@ function runPython(scriptPath: string, args: object): Promise<any> {
   });
 }
 
+function getBalance(address: string): Promise<number> {
+  return new Promise((resolve) => {
+    const proc = spawn("/opt/homebrew/bin/python3", ["scripts/get-balance.py", address]);
+    let stdout = "";
+    proc.stdout.on("data", (data) => { stdout += data.toString(); });
+    proc.on("close", () => {
+      try {
+        resolve(JSON.parse(stdout).balance);
+      } catch {
+        resolve(0);
+      }
+    });
+  });
+}
+
 export async function POST(request: Request) {
   try {
     const body: WithdrawRequest = await request.json();
@@ -61,8 +76,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get agent's private key
     const agentPrivateKey = agent === "black-widow" ? BLACK_WIDOW_PRIVATE_KEY : LOKI_PRIVATE_KEY;
+    const agentAddress = agent === "black-widow" ? BLACK_WIDOW : LOKI;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
     console.log("Starting withdraw:", { agent: agentName, amount, to: PEPPER_ADDRESS });
@@ -77,8 +92,11 @@ export async function POST(request: Request) {
     console.log("Withdraw result:", result);
 
     if (result.status === "ok") {
-      // Record the withdraw as a "withdraw" event (negative balance)
-      recordBalance(agent, -amount, "withdraw");
+      // Wait a bit for the withdraw to settle, then record new balance
+      setTimeout(async () => {
+        const balance = await getBalance(agentAddress);
+        recordBalance(agent, balance, "withdraw");
+      }, 3000);
       
       return NextResponse.json({
         success: true,
