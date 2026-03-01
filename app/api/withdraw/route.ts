@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
-import { recordBalance } from "@/lib/balanceHistory";
+import { recordWithdraw } from "@/lib/balanceHistory";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const PEPPER_ADDRESS = process.env.PEPPER_ADDRESS!;
@@ -95,7 +95,7 @@ export async function POST(request: Request) {
       // Wait a bit for the withdraw to settle, then record new balance
       setTimeout(async () => {
         const balance = await getBalance(agentAddress);
-        recordBalance(agent, balance, "withdraw");
+        recordWithdraw(agent, amount);
       }, 3000);
       
       return NextResponse.json({

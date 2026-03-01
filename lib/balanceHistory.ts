@@ -29,7 +29,8 @@ function writeHistory(history: BalanceHistory) {
   fs.writeFileSync(DATA_FILE, JSON.stringify(history, null, 2));
 }
 
-export function recordBalance(agent: string, amount: number, type: "fund" | "withdraw") {
+// Record a transfer event - amount is what was transferred
+export function recordTransfer(agent: string, amount: number) {
   const history = readHistory();
   
   if (!history[agent]) {
@@ -39,7 +40,24 @@ export function recordBalance(agent: string, amount: number, type: "fund" | "wit
   history[agent].push({
     timestamp: Date.now(),
     amount,
-    type,
+    type: "fund",
+  });
+  
+  writeHistory(history);
+}
+
+// Record a withdraw event
+export function recordWithdraw(agent: string, amount: number) {
+  const history = readHistory();
+  
+  if (!history[agent]) {
+    history[agent] = [];
+  }
+  
+  history[agent].push({
+    timestamp: Date.now(),
+    amount,
+    type: "withdraw",
   });
   
   writeHistory(history);

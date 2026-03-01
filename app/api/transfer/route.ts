@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { spawn } from "child_process";
 import path from "path";
-import { recordBalance } from "@/lib/balanceHistory";
+import { recordTransfer } from "@/lib/balanceHistory";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
@@ -91,7 +91,7 @@ export async function POST(request: Request) {
       // Wait a bit for the transfer to settle, then get actual balance
       setTimeout(async () => {
         const balance = await getBalance(destination);
-        recordBalance(agent, balance, "fund");
+        recordTransfer(agent, amount);
       }, 3000);
       
       return NextResponse.json({
