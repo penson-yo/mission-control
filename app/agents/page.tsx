@@ -59,6 +59,22 @@ export default function Agents() {
     setTimeout(fetchData, 2000);
   };
 
+  const handleWithdraw = async (agent: string, amount: number) => {
+    const res = await fetch("/api/withdraw", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agent, amount }),
+    });
+
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error || "Withdraw failed");
+    }
+
+    // Refresh data after withdraw
+    setTimeout(fetchData, 2000);
+  };
+
   if (loading) {
     return (
       <SidebarProvider defaultOpen={true}>
@@ -94,6 +110,7 @@ export default function Agents() {
               color="text-orange-500"
               agentKey="black-widow"
               onTransfer={handleTransfer}
+              onWithdraw={handleWithdraw}
             />
 
             <AgentCard
@@ -104,6 +121,7 @@ export default function Agents() {
               color="text-green-500"
               agentKey="loki"
               onTransfer={handleTransfer}
+              onWithdraw={handleWithdraw}
             />
           </div>
         </div>

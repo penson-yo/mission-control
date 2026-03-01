@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, ExternalLink, Wallet, ArrowDownToLine } from "lucide-react";
+import { Loader2, ExternalLink, ArrowDownToLine, ArrowUpFromLine } from "lucide-react";
 
 interface AgentCardProps {
   name: string;
@@ -14,10 +14,12 @@ interface AgentCardProps {
   color: string;
   agentKey: "black-widow" | "loki";
   onTransfer: (agent: string, amount: number) => Promise<void>;
+  onWithdraw: (agent: string, amount: number) => Promise<void>;
 }
 
-export function AgentCard({ name, address, balance, pnl, color, agentKey, onTransfer }: AgentCardProps) {
+export function AgentCard({ name, address, balance, pnl, color, agentKey, onTransfer, onWithdraw }: AgentCardProps) {
   const [showFund, setShowFund] = useState(false);
+  const [showWithdraw, setShowWithdraw] = useState(false);
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +43,29 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
       setShowFund(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Transfer failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const value = parseFloat(amount);
+    if (!value || value <= 0) {
+      setError("Enter a valid amount");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      await onWithdraw(agentKey, value);
+      setSuccess(`Withdrew $${value} from ${name}`);
+      setAmount("");
+      setShowWithdraw(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Withdraw failed");
     } finally {
       setLoading(false);
     }
@@ -83,12 +108,27 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
               {success && <p className="text-sm text-green-500">{success}</p>}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowFund(false)}
-                disabled={loading}
-              >
+              <Button variant="ghost" size="sm" onClick={() => { setShowFund(false); setError(null); setSuccess(null); }} disabled={loading}>
+                Cancel
+              </Button>
+            </div>
+          ) : showWithdraw ? (
+            <div className="space-y-3 pt-2">
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  placeholder="Amount"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  disabled={loading}
+                />
+                <Button onClick={handleWithdraw} disabled={loading} variant="secondary">
+                  {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Withdraw"}
+                </Button>
+              </div>
+              {error && <p className="text-sm text-red-500">{error}</p>}
+              {success && <p className="text-sm text-green-500">{success}</p>}
+              <Button variant="ghost" size="sm" onClick={() => { setShowWithdraw(false); setError(null); setSuccess(null); }} disabled={loading}>
                 Cancel
               </Button>
             </div>
@@ -98,10 +138,13 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
                 <ArrowDownToLine className="mr-2 h-4 w-4" />
                 Fund
               </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowWithdraw(true)}>
+                <ArrowUpFromLine className="mr-2 h-4 w-4" />
+                Withdraw
+              </Button>
               <Button asChild variant="ghost" size="sm">
                 <a href={`https://hyperdash.com/address/${address}`} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="mr-2 h-4 w-4" />
-                  View
+                  <ExternalLink className="h-4 w-4" />
                 </a>
               </Button>
             </div>
