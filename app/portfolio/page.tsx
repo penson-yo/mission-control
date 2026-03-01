@@ -9,7 +9,7 @@ import { Wallet, TrendingUp, Loader2 } from "lucide-react";
 import { FundingWalletCard } from "@/components/dashboard/FundingWalletCard";
 
 export default function Portfolio() {
-  const [totalPortfolio, setTotalPortfolio] = useState(0);
+  const [agentBalances, setAgentBalances] = useState(0);
   const [totalPnl, setTotalPnl] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +19,9 @@ export default function Portfolio() {
       fetch("/api/pnl").then((res) => res.json()),
     ])
       .then(([portfolioData, pnlData]) => {
-        setTotalPortfolio(portfolioData.totalPortfolio || 0);
+        // Only agent balances (exclude Pepper)
+        const agents = (portfolioData.blackWidow?.balance || 0) + (portfolioData.loki?.balance || 0);
+        setAgentBalances(agents);
         setTotalPnl(pnlData.totalPnl || 0);
         setLoading(false);
       })
@@ -65,7 +67,7 @@ export default function Portfolio() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-4xl font-bold">${totalPortfolio.toFixed(2)}</p>
+                <p className="text-4xl font-bold">${agentBalances.toFixed(2)}</p>
               </CardContent>
             </Card>
 
