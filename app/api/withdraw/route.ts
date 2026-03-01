@@ -3,8 +3,11 @@ import { spawn } from "child_process";
 import path from "path";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
+const PEPPER_ADDRESS = process.env.PEPPER_ADDRESS!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
+const BLACK_WIDOW_PRIVATE_KEY = process.env.BLACK_WIDOW_PRIVATE_KEY!;
+const LOKI_PRIVATE_KEY = process.env.LOKI_PRIVATE_KEY!;
 
 interface WithdrawRequest {
   agent: "black-widow" | "loki";
@@ -57,15 +60,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const source = agent === "black-widow" ? BLACK_WIDOW : LOKI;
+    // Get agent's private key and address
+    const agentPrivateKey = agent === "black-widow" ? BLACK_WIDOW_PRIVATE_KEY : LOKI_PRIVATE_KEY;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
-    console.log("Starting withdraw:", { source, amount });
+    console.log("Starting withdraw:", { agent: agentName, amount, to: PEPPER_ADDRESS });
 
     const scriptPath = path.join(process.cwd(), "scripts", "withdraw.py");
     const result = await runPython(scriptPath, {
-      private_key: PEPPER_PRIVATE_KEY,
-      source: source,
+      private_key: agentPrivateKey,
+      destination: PEPPER_ADDRESS,
       amount: amount,
     });
 
