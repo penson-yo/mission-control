@@ -12,10 +12,10 @@ async function fetchPnL(address: string): Promise<number> {
   });
 
   const data: PortfolioResponse = await response.json();
-  const allTime = data?.find((d: [string, unknown]) => d[0] === "allTime");
+  const allTime = data?.find((d) => d[0] === "allTime");
   if (!allTime) return 0;
   
-  const pnlHistory = (allTime[1] as { pnlHistory?: [number, string][] })?.pnlHistory;
+  const pnlHistory = allTime[1]?.pnlHistory;
   return parseFloat(pnlHistory?.[pnlHistory.length - 1]?.[1]) || 0;
 }
 

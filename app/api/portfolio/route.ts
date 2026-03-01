@@ -13,11 +13,11 @@ async function fetchPortfolio(address: string): Promise<{ balance: number; pnl: 
 
   const data: PortfolioResponse = await response.json();
   
-  const allTime = data?.find((d: [string, unknown]) => d[0] === "allTime");
+  const allTime = data?.find((d) => d[0] === "allTime");
   if (!allTime) return { balance: 0, pnl: 0 };
   
-  const history = (allTime[1] as AllTimeData)?.accountValueHistory;
-  const pnlHistory = (allTime[1] as AllTimeData)?.pnlHistory;
+  const history = allTime[1]?.accountValueHistory;
+  const pnlHistory = allTime[1]?.pnlHistory;
   
   const balance = parseFloat(history?.[history.length - 1]?.[1]) || 0;
   const pnl = parseFloat(pnlHistory?.[pnlHistory.length - 1]?.[1]) || 0;

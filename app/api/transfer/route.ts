@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Exchange } from "hyperliquid";
+import { Hyperliquid } from "hyperliquid";
 
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
@@ -25,16 +25,15 @@ export async function POST(request: Request) {
     const destination = agent === "black-widow" ? BLACK_WIDOW : LOKI;
     const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
 
-    // Initialize Pepper's wallet - private key as second param
-    const exchange = new Exchange(null, PEPPER_PRIVATE_KEY, undefined, "0xa96d52e31b09cc1e8e85e2f978159c8437907e3d");
+    // Initialize Hyperliquid with Pepper's private key
+    const hl = new Hyperliquid({ privateKey: PEPPER_PRIVATE_KEY });
+    await hl.connect();
 
-    // Execute transfer
-    const result = await exchange.send_asset(
+    // Use spotTransfer via the custom operations
+    const result = await (hl as any).custom.spotTransfer(
       destination,
-      "spot",
-      "spot",
       "USDC",
-      amount
+      amount.toString()
     );
 
     if (result.status === "ok") {

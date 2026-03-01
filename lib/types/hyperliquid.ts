@@ -61,6 +61,5 @@ export interface AllTimeData {
   pnlHistory: PnLEntry[];
 }
 
-export interface PortfolioResponse {
-  [key: string]: [string, AllTimeData][];
-}
+// Portfolio response is an array of [period, data] pairs
+export type PortfolioResponse = [string, AllTimeData][];

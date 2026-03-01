@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PortfolioResponse, Fill } from "@/lib/types/hyperliquid";
+import { PortfolioResponse } from "@/lib/types/hyperliquid";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
@@ -13,11 +13,11 @@ async function fetchPortfolio(address: string): Promise<PortfolioResponse> {
   return response.json();
 }
 
-function parsePnlHistory(data: PortfolioResponse): { time: number; pnl: number }[] {
-  const allTime = data?.find((d: [string, unknown]) => d[0] === "allTime");
+function parsePnlHistory(data: PortfolioResponse) {
+  const allTime = data?.find((d) => d[0] === "allTime");
   if (!allTime) return [];
   
-  const pnlHistory = (allTime[1] as { pnlHistory?: [number, string][] })?.pnlHistory || [];
+  const pnlHistory = allTime[1]?.pnlHistory || [];
   const daily: { time: number; pnl: number }[] = [];
   
   for (let i = 1; i < pnlHistory.length; i++) {
