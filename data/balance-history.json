@@ -1,9 +1,19 @@
 {
   "black-widow": [
     {
-      "timestamp": 1772175431537,
+      "timestamp": 1772417821421,
       "amount": 100,
       "type": "fund"
+    },
+    {
+      "timestamp": 1772418165487,
+      "amount": 5,
+      "type": "fund"
+    },
+    {
+      "timestamp": 1772418322964,
+      "amount": 5,
+      "type": "withdraw"
     }
   ],
   "loki": [
@@ -15,7 +25,7 @@
   ],
   "thor": [
     {
-      "timestamp": 1772521495000,
+      "timestamp": 1772175431537,
       "amount": 100,
       "type": "fund"
     }

@@ -132,7 +132,7 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
               <p className="text-xs text-muted-foreground mt-1">
                 {apyData.days} days • ${apyData.initialBalance.toFixed(2)} → ${apyData.currentBalance.toFixed(2)}
               </p>
-              {apyData.days >= 1 && (
+              {apyData.days > 0 {apyData.days >= 1 && ({apyData.days >= 1 && ( (
                 <p className="text-sm font-semibold mt-1">
                   APY: <span className={apyData.apy >= 0 ? "text-green-500" : "text-red-500"}>
                     {apyData.apy >= 0 ? "+" : ""}{apyData.apy}%
