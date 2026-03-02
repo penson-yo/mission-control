@@ -40,7 +40,8 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
     fetch("/api/apy")
       .then((res) => res.json())
       .then((data) => {
-        const agentData = data[agentKey];
+        const keyMap: Record<string, string> = {"black-widow": "blackWidow", "loki": "loki", "thor": "thor"};
+        const agentData = data[keyMap[agentKey] || agentKey];
         if (agentData && agentData.initialBalance > 0) {
           setApyData(agentData);
         }
