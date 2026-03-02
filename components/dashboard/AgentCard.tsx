@@ -12,7 +12,7 @@ interface AgentCardProps {
   balance: number;
   pnl: number;
   color: string;
-  agentKey: "black-widow" | "loki";
+  agentKey: "black-widow" | "loki" | "thor";
   onTransfer: (agent: string, amount: number) => Promise<void>;
   onWithdraw: (agent: string, amount: number) => Promise<void>;
 }
@@ -40,7 +40,7 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
     fetch("/api/apy")
       .then((res) => res.json())
       .then((data) => {
-        const agentData = agentKey === "black-widow" ? data.blackWidow : data.loki;
+        const agentData = data[agentKey];
         if (agentData && agentData.initialBalance > 0) {
           setApyData(agentData);
         }
@@ -162,7 +162,7 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={loading}
                 />
-                <Button onClick={handleFund} disabled={loading}>
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={handleFund} disabled={loading}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send"}
                 </Button>
               </div>
@@ -182,10 +182,10 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
                   onChange={(e) => setAmount(e.target.value)}
                   disabled={loading}
                 />
-                <Button variant="outline" size="default" onClick={() => setMaxAmount(true)} disabled={loading}>
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white" variant="default" size="default" onClick={() => setMaxAmount(true)} disabled={loading}>
                   Max
                 </Button>
-                <Button onClick={handleWithdraw} disabled={loading} variant="secondary">
+                <Button className="bg-orange-500 hover:bg-orange-600 text-white" onClick={handleWithdraw} disabled={loading}>
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Withdraw"}
                 </Button>
               </div>
@@ -197,11 +197,11 @@ export function AgentCard({ name, address, balance, pnl, color, agentKey, onTran
             </div>
           ) : (
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowFund(true)}>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white" variant="default" size="sm" onClick={() => setShowFund(true)}>
                 <ArrowDownToLine className="mr-2 h-4 w-4" />
                 Fund
               </Button>
-              <Button variant="outline" size="sm" onClick={() => setShowWithdraw(true)}>
+              <Button className="bg-orange-500 hover:bg-orange-600 text-white" variant="default" size="sm" onClick={() => setShowWithdraw(true)}>
                 <ArrowUpFromLine className="mr-2 h-4 w-4" />
                 Withdraw
               </Button>

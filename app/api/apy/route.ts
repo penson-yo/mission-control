@@ -3,6 +3,7 @@ import { calculateMetrics, getNetInvestment } from "@/lib/balanceHistory";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
+const THOR = process.env.THOR_ADDRESS!;
 
 async function fetchCurrentBalance(address: string): Promise<number> {
   try {
@@ -26,17 +27,20 @@ async function fetchCurrentBalance(address: string): Promise<number> {
 
 export async function GET() {
   try {
-    const [bwBalance, lokiBalance] = await Promise.all([
+    const [bwBalance, lokiBalance, thorBalance] = await Promise.all([
       fetchCurrentBalance(BLACK_WIDOW),
       fetchCurrentBalance(LOKI),
+      fetchCurrentBalance(THOR),
     ]);
 
     const bwMetrics = calculateMetrics("black-widow", bwBalance);
     const lokiMetrics = calculateMetrics("loki", lokiBalance);
+    const thorMetrics = calculateMetrics("thor", thorBalance);
 
     return NextResponse.json({
       blackWidow: bwMetrics || { initialBalance: 0, currentBalance: bwBalance, pnl: 0, pnlPercent: 0, apy: 0, days: 0 },
       loki: lokiMetrics || { initialBalance: 0, currentBalance: lokiBalance, pnl: 0, pnlPercent: 0, apy: 0, days: 0 },
+      thor: thorMetrics || { initialBalance: 0, currentBalance: thorBalance, pnl: 0, pnlPercent: 0, apy: 0, days: 0 },
     });
   } catch (error) {
     console.error("APY API error:", error);

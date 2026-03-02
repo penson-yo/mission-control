@@ -6,9 +6,10 @@ import { recordTransfer } from "@/lib/balanceHistory";
 const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
+const THOR = process.env.THOR_ADDRESS!;
 
 interface TransferRequest {
-  agent: "black-widow" | "loki";
+  agent: "black-widow" | "loki" | "thor";
   amount: number;
 }
 
@@ -73,8 +74,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const destination = agent === "black-widow" ? BLACK_WIDOW : LOKI;
-    const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
+    const destination = agent === "black-widow" ? BLACK_WIDOW : agent === "loki" ? LOKI : THOR;
+    const agentName = agent === "black-widow" ? "Black Widow" : agent === "loki" ? "Loki" : "Thor";
 
     console.log("Starting transfer:", { destination, amount });
 

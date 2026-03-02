@@ -22,7 +22,7 @@ function readHistory(): BalanceHistory {
   } catch (e) {
     console.error("Error reading balance history:", e);
   }
-  return { "black-widow": [], loki: [] };
+  return { "black-widow": [], loki: [], thor: [] };
 }
 
 function writeHistory(history: BalanceHistory) {

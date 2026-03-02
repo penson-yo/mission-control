@@ -7,11 +7,13 @@ const PEPPER_PRIVATE_KEY = process.env.PEPPER_PRIVATE_KEY!;
 const PEPPER_ADDRESS = process.env.PEPPER_ADDRESS!;
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
+const THOR = process.env.THOR_ADDRESS!;
 const BLACK_WIDOW_PRIVATE_KEY = process.env.BLACK_WIDOW_PRIVATE_KEY!;
 const LOKI_PRIVATE_KEY = process.env.LOKI_PRIVATE_KEY!;
+const THOR_PRIVATE_KEY = process.env.THOR_PRIVATE_KEY!;
 
 interface WithdrawRequest {
-  agent: "black-widow" | "loki";
+  agent: "black-widow" | "loki" | "thor";
   amount: number;
 }
 
@@ -76,9 +78,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const agentPrivateKey = agent === "black-widow" ? BLACK_WIDOW_PRIVATE_KEY : LOKI_PRIVATE_KEY;
-    const agentAddress = agent === "black-widow" ? BLACK_WIDOW : LOKI;
-    const agentName = agent === "black-widow" ? "Black Widow" : "Loki";
+    const agentPrivateKey = agent === "black-widow" ? BLACK_WIDOW_PRIVATE_KEY : agent === "loki" ? LOKI_PRIVATE_KEY : THOR_PRIVATE_KEY;
+    const agentAddress = agent === "black-widow" ? BLACK_WIDOW : agent === "loki" ? LOKI : THOR;
+    const agentName = agent === "black-widow" ? "Black Widow" : agent === "loki" ? "Loki" : "Thor";
 
     console.log("Starting withdraw:", { agent: agentName, amount, to: PEPPER_ADDRESS });
 

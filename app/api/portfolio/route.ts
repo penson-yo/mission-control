@@ -3,6 +3,7 @@ import { PortfolioResponse } from "@/lib/types/hyperliquid";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
+const THOR = process.env.THOR_ADDRESS!;
 const PEPPER = process.env.PEPPER_ADDRESS!;
 
 async function fetchPortfolio(address: string): Promise<{ balance: number; pnl: number }> {
@@ -28,17 +29,19 @@ async function fetchPortfolio(address: string): Promise<{ balance: number; pnl: 
 
 export async function GET() {
   try {
-    const [bw, loki, pepper] = await Promise.all([
+    const [bw, loki, thor, pepper] = await Promise.all([
       fetchPortfolio(BLACK_WIDOW),
       fetchPortfolio(LOKI),
+      fetchPortfolio(THOR),
       fetchPortfolio(PEPPER),
     ]);
 
     return NextResponse.json({
       blackWidow: bw,
       loki: loki,
+      thor: thor,
       pepper: pepper,
-      totalPortfolio: bw.balance + loki.balance + pepper.balance,
+      totalPortfolio: bw.balance + loki.balance + thor.balance + pepper.balance,
     });
   } catch (error) {
     console.error("Hyperliquid API error:", error);

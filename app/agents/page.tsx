@@ -9,6 +9,7 @@ import { AgentCard } from "@/components/dashboard/AgentCard";
 
 const BLACK_WIDOW_ADDRESS = process.env.NEXT_PUBLIC_BLACK_WIDOW_ADDRESS!;
 const LOKI_ADDRESS = process.env.NEXT_PUBLIC_LOKI_ADDRESS!;
+const THOR_ADDRESS = process.env.NEXT_PUBLIC_THOR_ADDRESS!;
 
 interface BotData {
   balance: number;
@@ -18,6 +19,7 @@ interface BotData {
 export default function Agents() {
   const [blackWidow, setBlackWidow] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loki, setLoki] = useState<BotData>({ balance: 0, pnl: 0 });
+  const [thor, setThor] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loading, setLoading] = useState(true);
 
   const fetchData = () => {
@@ -27,6 +29,10 @@ export default function Agents() {
         setBlackWidow({
           balance: data.blackWidow?.balance || 0,
           pnl: data.blackWidow?.pnl || 0,
+        });
+        setThor({
+          balance: data.thor?.balance || 0,
+          pnl: data.thor?.pnl || 0,
         });
         setLoki({
           balance: data.loki?.balance || 0,
@@ -101,7 +107,7 @@ export default function Agents() {
         <div className="p-8">
           <h1 className="text-3xl font-bold mb-6">Agents</h1>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AgentCard
               name="Black Widow"
               address={BLACK_WIDOW_ADDRESS}
@@ -120,6 +126,17 @@ export default function Agents() {
               pnl={loki.pnl}
               color="text-green-500"
               agentKey="loki"
+              onTransfer={handleTransfer}
+              onWithdraw={handleWithdraw}
+            />
+
+            <AgentCard
+              name="Thor"
+              address={THOR_ADDRESS}
+              balance={thor.balance}
+              pnl={thor.pnl}
+              color="text-blue-500"
+              agentKey="thor"
               onTransfer={handleTransfer}
               onWithdraw={handleWithdraw}
             />

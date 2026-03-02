@@ -104,7 +104,7 @@ export default function Home() {
           </div>
         )}
         
-        <div className="flex gap-4 m-8">
+        <div className="flex flex-wrap gap-4 m-8">
           <div className="flex-1">
             <PortfolioCard />
           </div>
