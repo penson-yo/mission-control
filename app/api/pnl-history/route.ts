@@ -3,6 +3,7 @@ import { PortfolioResponse } from "@/lib/types/hyperliquid";
 
 const BLACK_WIDOW = process.env.BLACK_WIDOW_ADDRESS!;
 const LOKI = process.env.LOKI_ADDRESS!;
+const THOR = process.env.THOR_ADDRESS!;
 
 async function fetchPortfolio(address: string): Promise<PortfolioResponse> {
   const response = await fetch("https://api.hyperliquid.xyz/info", {
@@ -34,18 +35,20 @@ function parsePnlHistory(data: PortfolioResponse) {
 
 export async function GET() {
   try {
-    const [bwData, lokiData] = await Promise.all([
+    const [bwData, lokiData, thorData] = await Promise.all([
       fetchPortfolio(BLACK_WIDOW),
       fetchPortfolio(LOKI),
+      fetchPortfolio(THOR),
     ]);
 
     const bwDaily = parsePnlHistory(bwData);
     const lokiDaily = parsePnlHistory(lokiData);
+    const thorDaily = parsePnlHistory(thorData);
 
     // Aggregate by day
     const pnlByDay = new Map<string, number>();
     
-    [...bwDaily, ...lokiDaily].forEach((entry) => {
+    [...bwDaily, ...lokiDaily, ...thorDaily].forEach((entry) => {
       const date = new Date(entry.time).toLocaleDateString('en-AU', { month: 'short', day: 'numeric', timeZone: 'Australia/Melbourne' });
       const current = pnlByDay.get(date) || 0;
       pnlByDay.set(date, current + entry.pnl);

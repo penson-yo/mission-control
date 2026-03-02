@@ -23,9 +23,11 @@ import {
 } from "@/components/ui/pagination";
 import { PortfolioCard } from "@/components/dashboard/PortfolioCard";
 import { PnLCard } from "@/components/dashboard/PnLCard";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
   const [chartData, setChartData] = useState<{date: string, pnl: number}[]>([]);
+  const [portfolioData, setPortfolioData] = useState<{date: string, value: number}[]>([]);
   const [trades, setTrades] = useState<any[]>([]);
   const [totalTradePnl, setTotalTradePnl] = useState<number>(0);
   const [totalApy, setTotalApy] = useState<number | null>(null);
@@ -49,6 +51,13 @@ export default function Home() {
             setChartData(data.data);
           }
         }),
+      fetch("/api/portfolio-history")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.data && Array.isArray(data.data)) {
+            setPortfolioData(data.data);
+          }
+        }),
       fetch("/api/trades")
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch trades");
@@ -64,18 +73,20 @@ export default function Home() {
         .then((res) => res.json())
         .then((data) => {
           const bw = data.blackWidow || {};
+          const thor = data.thor || {};
           const loki = data.loki || {};
           
           // Calculate combined APY weighted by balance
           const bwNet = bw.initialBalance || 0;
           const lokiNet = loki.initialBalance || 0;
-          const totalNet = bwNet + lokiNet;
+          const thorNet = thor.initialBalance || 0;
+          const totalNet = bwNet + lokiNet + thorNet;
           
           if (totalNet > 0) {
             const bwPnl = bw.pnl || 0;
             const lokiPnl = loki.pnl || 0;
-            const totalPnl = bwPnl + lokiPnl;
-            const days = Math.max(bw.days || 1, loki.days || 1, 1);
+            const totalPnl = bwPnl + lokiPnl + (thor.pnl || 0);
+            const days = Math.max(bw.days || 1, loki.days || 1, thor.days || 1, 1);
             const apy = (totalPnl / totalNet) * (365 / days) * 100;
             setTotalApy(Math.round(apy * 100) / 100);
           }
@@ -130,41 +141,81 @@ export default function Home() {
         </div>
         <div className="p-8 pt-0">
 
-          {/* PnL Chart */}
+          {/* Chart with Tabs */}
           <Card className="mb-8">
             <CardHeader>
-              <CardTitle>PnL History</CardTitle>
+              <CardTitle>Performance</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData.length > 0 ? chartData : undefined}>
-                    <defs>
-                      <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#f54900" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#f54900" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <XAxis dataKey="date" stroke="#888888" fontSize={12} />
-                    <YAxis stroke="#888888" fontSize={12} />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: '#1a1a1a', 
-                        border: '1px solid #333',
-                        borderRadius: '8px'
-                      }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="pnl" 
-                      stroke="#f54900" 
-                      strokeWidth={2}
-                      fillOpacity={1} 
-                      fill="url(#colorPnl)" 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+              <Tabs defaultValue="portfolio" className="w-full">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="portfolio">Portfolio Value</TabsTrigger>
+                  <TabsTrigger value="pnl">PnL History</TabsTrigger>
+                </TabsList>
+                <TabsContent value="portfolio">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={portfolioData.length > 0 ? portfolioData : undefined}>
+                        <defs>
+                          <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#22c55e" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="date" stroke="#888888" fontSize={12} />
+                        <YAxis stroke="#888888" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1a1a1a', 
+                            border: '1px solid #333',
+                            borderRadius: '8px'
+                          }}
+                          formatter={(value: number) => [`$${value}`, "Value"]}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="value" 
+                          stroke="#22c55e" 
+                          strokeWidth={2}
+                          fillOpacity={1} 
+                          fill="url(#colorValue)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </TabsContent>
+                <TabsContent value="pnl">
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData.length > 0 ? chartData : undefined}>
+                        <defs>
+                          <linearGradient id="colorPnl" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f54900" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#f54900" stopOpacity={0}/>
+                          </linearGradient>
+                        </defs>
+                        <XAxis dataKey="date" stroke="#888888" fontSize={12} />
+                        <YAxis stroke="#888888" fontSize={12} />
+                        <Tooltip 
+                          contentStyle={{ 
+                            backgroundColor: '#1a1a1a', 
+                            border: '1px solid #333',
+                            borderRadius: '8px'
+                          }}
+                        />
+                        <Area 
+                          type="monotone" 
+                          dataKey="pnl" 
+                          stroke="#f54900" 
+                          strokeWidth={2}
+                          fillOpacity={1} 
+                          fill="url(#colorPnl)" 
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 
