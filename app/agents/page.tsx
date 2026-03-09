@@ -23,9 +23,10 @@ export default function Agents() {
   const [thor, setThor] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loading, setLoading] = useState(true);
 
-  const itemVariants = {
+  const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    hover: { scale: 1.02, transition: { duration: 0.2 } }
   };
 
   const fetchData = () => {
@@ -112,7 +113,7 @@ export default function Agents() {
           <h1 className="text-3xl font-bold mb-6">Agents</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <motion.div variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" whileHover="hover">
               <AgentCard
                 name="Black Widow"
                 address={BLACK_WIDOW_ADDRESS}
@@ -124,7 +125,7 @@ export default function Agents() {
                 onWithdraw={handleWithdraw}
               />
             </motion.div>
-            <motion.div variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" whileHover="hover">
               <AgentCard
                 name="Loki"
                 address={LOKI_ADDRESS}
@@ -136,7 +137,7 @@ export default function Agents() {
                 onWithdraw={handleWithdraw}
               />
             </motion.div>
-            <motion.div variants={itemVariants} initial="hidden" animate="visible">
+            <motion.div variants={cardVariants} initial="hidden" animate="visible" whileHover="hover">
               <AgentCard
                 name="Thor"
                 address={THOR_ADDRESS}

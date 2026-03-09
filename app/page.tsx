@@ -45,9 +45,10 @@ export default function Home() {
     }
   };
 
-  const itemVariants = {
+  const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+    hover: { scale: 1.02, transition: { duration: 0.2 } }
   };
 
   const totalPages = Math.ceil(trades.length / itemsPerPage);
@@ -135,14 +136,14 @@ export default function Home() {
           initial="hidden"
           animate="visible"
         >
-          <motion.div className="flex-1" variants={itemVariants}>
+          <motion.div className="flex-1" variants={cardVariants} whileHover="hover">
             <PortfolioCard />
           </motion.div>
-          <motion.div className="flex-1" variants={itemVariants}>
+          <motion.div className="flex-1" variants={cardVariants} whileHover="hover">
             <PnLCard />
           </motion.div>
           {totalApy !== null && (
-            <motion.div className="flex-1" variants={itemVariants}>
+            <motion.div className="flex-1" variants={cardVariants} whileHover="hover">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium">Total APY</CardTitle>
