@@ -171,7 +171,7 @@ export default function Home() {
                   <TabsTrigger value="portfolio">Portfolio Value</TabsTrigger>
                   <TabsTrigger value="pnl">PnL History</TabsTrigger>
                 </TabsList>
-                <motion.TabsContent value="portfolio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                <TabsContent value="portfolio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={portfolioData.length > 0 ? portfolioData : undefined}>
@@ -203,7 +203,7 @@ export default function Home() {
                     </ResponsiveContainer>
                   </div>
                 </TabsContent>
-                <motion.TabsContent value="pnl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
+                <TabsContent value="pnl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData.length > 0 ? chartData : undefined}>
@@ -232,7 +232,7 @@ export default function Home() {
                         />
                       </AreaChart>
                     </ResponsiveContainer>
-                  </div>
+                  </motion.div>
                 </TabsContent>
               </Tabs>
             </CardContent>
