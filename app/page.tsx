@@ -232,7 +232,7 @@ export default function Home() {
                         />
                       </AreaChart>
                     </ResponsiveContainer>
-                  </motion.div>
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
