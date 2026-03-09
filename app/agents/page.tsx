@@ -23,10 +23,6 @@ export default function Agents() {
   const [thor, setThor] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loading, setLoading] = useState(true);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.15 } }
-  };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -54,7 +50,6 @@ export default function Agents() {
       .catch(() => {
         setLoading(false);
       });
-  };
 
   useEffect(() => {
     fetchData();
@@ -74,7 +69,6 @@ export default function Agents() {
 
     // Refresh data after transfer
     setTimeout(fetchData, 2000);
-  };
 
   const handleWithdraw = async (agent: string, amount: number) => {
     const res = await fetch("/api/withdraw", {
@@ -90,7 +84,6 @@ export default function Agents() {
 
     // Refresh data after withdraw
     setTimeout(fetchData, 2000);
-  };
 
   if (loading) {
     return (
@@ -118,12 +111,7 @@ export default function Agents() {
         <div className="p-8">
           <h1 className="text-3xl font-bold mb-6">Agents</h1>
           
-          <motion.div 
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-          >
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <motion.div variants={itemVariants}>
             <AgentCard
               name="Black Widow"
@@ -135,7 +123,8 @@ export default function Agents() {
               onTransfer={handleTransfer}
               onWithdraw={handleWithdraw}
             />
-
+            </motion.div>
+            <motion.div variants={itemVariants}>
             <AgentCard
               name="Loki"
               address={LOKI_ADDRESS}
@@ -146,7 +135,8 @@ export default function Agents() {
               onTransfer={handleTransfer}
               onWithdraw={handleWithdraw}
             />
-
+            </motion.div>
+            <motion.div variants={itemVariants}>
             <AgentCard
               name="Thor"
               address={THOR_ADDRESS}
@@ -158,7 +148,7 @@ export default function Agents() {
               onWithdraw={handleWithdraw}
             />
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
