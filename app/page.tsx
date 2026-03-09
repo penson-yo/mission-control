@@ -24,6 +24,7 @@ import {
 import { PortfolioCard } from "@/components/dashboard/PortfolioCard";
 import { PnLCard } from "@/components/dashboard/PnLCard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
 
 export default function Home() {
   const [chartData, setChartData] = useState<{date: string, pnl: number}[]>([]);
@@ -35,6 +36,19 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 5;
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
+  };
 
   const totalPages = Math.ceil(trades.length / itemsPerPage);
   const paginatedTrades = trades.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
@@ -115,15 +129,20 @@ export default function Home() {
           </div>
         )}
         
-        <div className="flex flex-wrap gap-4 m-8">
-          <div className="flex-1">
+        <motion.div 
+          className="flex flex-wrap gap-4 m-8"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.div className="flex-1" variants={itemVariants}>
             <PortfolioCard />
-          </div>
-          <div className="flex-1">
+          </motion.div>
+          <motion.div className="flex-1" variants={itemVariants}>
             <PnLCard />
-          </div>
+          </motion.div>
           {totalApy !== null && (
-            <div className="flex-1">
+            <motion.div className="flex-1" variants={itemVariants}>
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium">Total APY</CardTitle>
@@ -136,9 +155,9 @@ export default function Home() {
                   <p className="text-xs text-muted-foreground">Combined</p>
                 </CardContent>
               </Card>
-            </div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
         <div className="p-8 pt-0">
 
           {/* Chart with Tabs */}
@@ -152,7 +171,7 @@ export default function Home() {
                   <TabsTrigger value="portfolio">Portfolio Value</TabsTrigger>
                   <TabsTrigger value="pnl">PnL History</TabsTrigger>
                 </TabsList>
-                <TabsContent value="portfolio">
+                <motion.TabsContent value="portfolio" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={portfolioData.length > 0 ? portfolioData : undefined}>
@@ -184,7 +203,7 @@ export default function Home() {
                     </ResponsiveContainer>
                   </div>
                 </TabsContent>
-                <TabsContent value="pnl">
+                <motion.TabsContent value="pnl" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
                   <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData.length > 0 ? chartData : undefined}>
