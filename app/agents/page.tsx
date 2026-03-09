@@ -23,10 +23,9 @@ export default function Agents() {
   const [thor, setThor] = useState<BotData>({ balance: 0, pnl: 0 });
   const [loading, setLoading] = useState(true);
 
-
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
   };
 
   const fetchData = () => {
@@ -50,6 +49,7 @@ export default function Agents() {
       .catch(() => {
         setLoading(false);
       });
+  };
 
   useEffect(() => {
     fetchData();
@@ -67,8 +67,8 @@ export default function Agents() {
       throw new Error(error.error || "Transfer failed");
     }
 
-    // Refresh data after transfer
     setTimeout(fetchData, 2000);
+  };
 
   const handleWithdraw = async (agent: string, amount: number) => {
     const res = await fetch("/api/withdraw", {
@@ -82,8 +82,8 @@ export default function Agents() {
       throw new Error(error.error || "Withdraw failed");
     }
 
-    // Refresh data after withdraw
     setTimeout(fetchData, 2000);
+  };
 
   if (loading) {
     return (
@@ -112,41 +112,41 @@ export default function Agents() {
           <h1 className="text-3xl font-bold mb-6">Agents</h1>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <motion.div variants={itemVariants}>
-            <AgentCard
-              name="Black Widow"
-              address={BLACK_WIDOW_ADDRESS}
-              balance={blackWidow.balance}
-              pnl={blackWidow.pnl}
-              color="text-orange-500"
-              agentKey="black-widow"
-              onTransfer={handleTransfer}
-              onWithdraw={handleWithdraw}
-            />
+            <motion.div variants={itemVariants} initial="hidden" animate="visible">
+              <AgentCard
+                name="Black Widow"
+                address={BLACK_WIDOW_ADDRESS}
+                balance={blackWidow.balance}
+                pnl={blackWidow.pnl}
+                color="text-orange-500"
+                agentKey="black-widow"
+                onTransfer={handleTransfer}
+                onWithdraw={handleWithdraw}
+              />
             </motion.div>
-            <motion.div variants={itemVariants}>
-            <AgentCard
-              name="Loki"
-              address={LOKI_ADDRESS}
-              balance={loki.balance}
-              pnl={loki.pnl}
-              color="text-green-500"
-              agentKey="loki"
-              onTransfer={handleTransfer}
-              onWithdraw={handleWithdraw}
-            />
+            <motion.div variants={itemVariants} initial="hidden" animate="visible">
+              <AgentCard
+                name="Loki"
+                address={LOKI_ADDRESS}
+                balance={loki.balance}
+                pnl={loki.pnl}
+                color="text-green-500"
+                agentKey="loki"
+                onTransfer={handleTransfer}
+                onWithdraw={handleWithdraw}
+              />
             </motion.div>
-            <motion.div variants={itemVariants}>
-            <AgentCard
-              name="Thor"
-              address={THOR_ADDRESS}
-              balance={thor.balance}
-              pnl={thor.pnl}
-              color="text-blue-500"
-              agentKey="thor"
-              onTransfer={handleTransfer}
-              onWithdraw={handleWithdraw}
-            />
+            <motion.div variants={itemVariants} initial="hidden" animate="visible">
+              <AgentCard
+                name="Thor"
+                address={THOR_ADDRESS}
+                balance={thor.balance}
+                pnl={thor.pnl}
+                color="text-blue-500"
+                agentKey="thor"
+                onTransfer={handleTransfer}
+                onWithdraw={handleWithdraw}
+              />
             </motion.div>
           </div>
         </div>
